@@ -22,7 +22,7 @@ export default function LoginPage() {
         password,
       );
       const user = userCredential.user;
-      localStorage.setItem("useruid", user.uid);
+      sessionStorage.setItem("useruid", user.uid);
       window.location.href = "/pages"; // redirect
     } catch (error) {
       alert("Login gagal: " + error.message);

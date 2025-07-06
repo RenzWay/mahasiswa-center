@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { EditIcon, CheckCheckIcon, Trash2Icon, X } from "lucide-react";
-import { deleteTugas } from "@/app/model/model";
+import { deleteTugas, updateStatusTugas } from "@/app/model/model";
 
 export default function TaskList({ onedit, tugas = [] }) {
   const [active, setActive] = useState("semua");
 
   const filteredTugas = tugas.filter((tugas) => {
+    const status = Boolean(tugas.status);
     if (active === "semua") return true;
-    if (active === "selesai") return tugas.status === true;
-    if (active === "belum") return tugas.status === false;
+    if (active === "selesai") return status === true;
+    if (active === "belum") return status === false;
     return true;
   });
 
@@ -63,15 +64,16 @@ export default function TaskList({ onedit, tugas = [] }) {
                     </span>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => {
-                          const updated = tugas.map((t) =>
-                            t.id === row.id ? { ...t, status: !t.status } : t,
+                        onClick={async () => {
+                          const uid = sessionStorage.getItem("useruid");
+                          const newStatus = !row.status;
+                          const success = await updateStatusTugas(
+                            uid,
+                            row.id,
+                            newStatus,
                           );
-                          localStorage.setItem(
-                            "tugas",
-                            JSON.stringify(updated),
-                          );
-                          location.reload();
+                          if (success) location.reload();
+                          else alert("Gagal update status");
                         }}
                         title={
                           row.status ? "Tandai Belum Selesai" : "Tandai Selesai"
@@ -88,7 +90,7 @@ export default function TaskList({ onedit, tugas = [] }) {
                       </button>
                       <button
                         onClick={async () => {
-                          const uid = localStorage.getItem("useruid");
+                          const uid = sessionStorage.getItem("useruid");
                           const success = await deleteTugas(uid, row.id);
                           if (success) {
                             alert("Berhasil menghapus");

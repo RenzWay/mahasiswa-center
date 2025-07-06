@@ -18,8 +18,8 @@ export default function Page() {
 
   useEffect(() => {
     try {
-      const dataTugasString = localStorage.getItem("tugas");
-      const datacatatanString = localStorage.getItem("catatan");
+      const dataTugasString = sessionStorage.getItem("tugas");
+      const datacatatanString = sessionStorage.getItem("catatan");
       const parsedTugas = JSON.parse(dataTugasString) || [];
       const parsedCatatan = JSON.parse(datacatatanString) || [];
 

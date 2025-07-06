@@ -69,7 +69,7 @@ export default function TugasPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const useruid = localStorage.getItem("useruid");
+    const useruid = sessionStorage.getItem("useruid");
     if (!useruid) {
       alert("Harus login dulu");
       return;

@@ -8,6 +8,7 @@ import {
   query,
   where,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 
@@ -34,6 +35,18 @@ export async function getTugasByUser(uid) {
   } catch (error) {
     console.error("Firestore Get Error:", error.message);
     return [];
+  }
+}
+
+export async function updateStatusTugas(uid, id, status) {
+  try {
+    const docRef = doc(db, "tugas", uid, "items", String(id));
+    await updateDoc(docRef, { status: Boolean(status) });
+
+    return true;
+  } catch (e) {
+    console.error("Gagal update status:", e.message);
+    return false;
   }
 }
 
