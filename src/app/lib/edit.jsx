@@ -13,7 +13,7 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Pencil} from "lucide-react";
-import ModelFirestore from "@/app/model/model";
+import ModelFirestore from "@/model/model";
 import {Calendar28} from "@/app/lib/Calendar28";
 
 const Model = new ModelFirestore();

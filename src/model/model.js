@@ -8,6 +8,7 @@ export default class ModelFirestore {
     * */
     #task = collection(db, "task");
     #notes = collection(db, "notes");
+    #schedule = collection(db, "schedule");
 
     /*
          === class method for Task Page ====
@@ -105,6 +106,54 @@ export default class ModelFirestore {
             return deleteDoc(res)
         } catch (err) {
             console.error(err)
+        }
+    }
+
+    /*
+    * === Class method for Schedule page ===
+    * */
+
+    async getAllSchedule() {
+        try {
+            const sched = await getDocs(this.#schedule)
+            return sched.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+        } catch (err) {
+            console.error(err)
+            throw err;
+        }
+    }
+
+    async addSchedule(newSchedule) {
+        try {
+            const sched = await addDoc(this.#schedule, newSchedule);
+            return {id: sched.id, ...newSchedule}
+        } catch (e) {
+            console.error(e);
+            throw e
+        }
+    }
+
+    async updateSchedule(id, schedule) {
+        try {
+            const sched = await doc(db, "schedule", id);
+            await updateDoc(sched, this.#schedule, schedule);
+            return true;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    async deleteSchedule(id) {
+        try {
+            const sched = await doc(db, "schedule", id)
+            await deleteDoc(sched);
+        } catch (err) {
+            console.error(err);
+            throw err;
         }
     }
 }

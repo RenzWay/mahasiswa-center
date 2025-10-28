@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
     title: "Mahasiswa Center",
     description: "The Web App with new some surprise",
+    icons: {
+        icon: "/colleger.png",
+    },
 };
 
 export default function RootLayout({children}) {
@@ -29,6 +32,7 @@ export default function RootLayout({children}) {
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+
         <ThemeProvider
             attribute="class"
             defaultTheme="system"

@@ -12,7 +12,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import ModelFirestore from "@/app/model/model";
+import ModelFirestore from "@/model/model";
 import {Input} from "@/components/ui/input";
 import {Calendar28} from "@/app/lib/Calendar28";
 import {Label} from "@/components/ui/label";
@@ -140,7 +140,8 @@ export default function TaskPage() {
                                            placeholder="write it down before you forget 😭"/>
                                     <Calendar28 setDate={setDate} title="Due Date"/>
                                     <Button type="submit" className="w-full">
-                                        {submitting ? <div className="animate-spin"></div> : "Save Task"}
+                                        {submitting ?
+                                            <Loader2 className="animate-spin  mr-3 size-5"/> : "Save Task"}
                                     </Button>
                                 </form>
                             </DialogContent>

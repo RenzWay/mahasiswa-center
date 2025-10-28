@@ -1,76 +1,147 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Calendar} from "@/components/ui/calendar";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {PlusCircle, Trash2} from "lucide-react";
+import {motion} from "framer-motion";
+import ModelFirestore from "@/model/model";
+
+const Model = new ModelFirestore();
 
 export default function SchedulePage() {
     const [date, setDate] = useState(new Date());
+    const [schedule, setSchedule] = useState([]);
+    const [newTitle, setNewTitle] = useState("");
 
-    // dummy data
-    const [schedule] = useState([
-        {id: 1, title: "Belajar React", date: new Date(2025, 9, 26)},
-        {id: 2, title: "Ngopi santai", date: new Date(2025, 9, 27)},
-        {id: 3, title: "Ngerjain tugas", date: new Date(2025, 9, 26)},
-    ]);
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            const data = await Model.getAllSchedule();
+            setSchedule(data);
+        };
+        fetchSchedule();
+    }, []);
 
-    // filter jadwal sesuai tanggal yang dipilih
+    const handleAdd = async (e) => {
+        e.stopPropagation();
+        if (!newTitle.trim() || !date) return;
+
+        const newItem = {
+            title: newTitle.trim(),
+            date: date.toISOString(),
+        };
+
+        const id = await Model.addSchedule(newItem);
+        setSchedule((prev) => [...prev, {...newItem, id}]);
+        setNewTitle("");
+    };
+
+    const handleDelete = async (id) => {
+        await Model.deleteSchedule(id);
+        setSchedule((prev) => prev.filter((item) => item.id !== id));
+    };
+
     const selectedSchedule = schedule.filter(
-        (item) =>
-            item.date.toDateString() === date?.toDateString()
+        (item) => new Date(item.date).toDateString() === date?.toDateString()
     );
 
     return (
-        <section className="ml-4">
-            <header className="mb-4">
-                <h1 className="text-2xl font-semibold">Schedule Page</h1>
+        <motion.section
+            initial={{opacity: 0, y: 20}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.4}}
+            className="mx-auto mt-4 w-full max-w-5xl px-4 space-y-5"
+        >
+            <header className="text-center">
+                <h1 className="text-2xl font-semibold tracking-tight">
+                    📆 Schedule Days
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                    Chose your schedule and add your activity
+                </p>
             </header>
 
-            <section role="main" className="space-y-4">
-                <Calendar mode="single" selected={date} onSelect={setDate}/>
+            {/* layout utama: kolom di mobile, flex di desktop */}
+            <section className="flex flex-col md:flex-row gap-6">
+                {/* Kalender */}
+                <div className="rounded-lg border p-3 shadow-sm bg-card md:w-1/3">
+                    <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        className="w-full"
+                    />
+                </div>
 
-                <div className="p-3 rounded-md border">
+                {/* Daftar jadwal & input */}
+                <div className="rounded-lg border p-3 shadow-sm bg-card space-y-3 flex-1">
+                    <form onSubmit={handleAdd} className="flex items-center gap-2">
+                        <Input
+                            placeholder="Tambah jadwal..."
+                            value={newTitle}
+                            onChange={(e) => setNewTitle(e.target.value)}
+                            className="text-sm"
+                        />
+                        <Button size="sm">
+                            <PlusCircle className="w-4 h-4 mr-1"/>
+                            Add
+                        </Button>
+                    </form>
+
                     {date ? (
                         <>
-                            <p className="mb-2">
-                                📅 <span className="font-semibold">
-                                {date.toLocaleDateString("id-ID", {
+                            <p className="text-sm font-semibold mt-3">
+                                📅{" "}
+                                {date.toLocaleDateString("en-EN", {
                                     weekday: "long",
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
                                 })}
-                            </span>
                             </p>
 
                             {selectedSchedule.length > 0 ? (
-                                <div className="space-y-2">
+                                <div className="space-y-2 mt-2">
                                     {selectedSchedule.map((item) => (
-                                        <Card key={item.id}>
-                                            <CardHeader>
-                                                <CardTitle>{item.title}</CardTitle>
+                                        <Card
+                                            key={item.id}
+                                            className="border border-muted shadow-sm hover:shadow-md transition-all"
+                                        >
+                                            <CardHeader className="flex flex-row justify-between items-center p-3">
+                                                <CardTitle className="text-sm font-medium truncate">
+                                                    {item.title}
+                                                </CardTitle>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={() => handleDelete(item.id)}
+                                                >
+                                                    <Trash2 className="w-4 h-4 text-red-500"/>
+                                                </Button>
                                             </CardHeader>
-                                            <CardContent>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Jadwal penting 🚀
+                                            <CardContent className="p-3 pt-0">
+                                                <p className="text-xs text-muted-foreground">
+                                                    Important Schedule 🚀
                                                 </p>
                                             </CardContent>
                                         </Card>
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-muted-foreground">
-                                    Belum ada jadwal di tanggal ini 😴
+                                <p className="text-sm text-muted-foreground mt-2 text-center">
+                                    You haven't schedule right now 😴
                                 </p>
                             )}
                         </>
                     ) : (
-                        <p className="text-muted-foreground">
-                            Klik tanggal di kalender untuk melihat jadwalnya.
+                        <p className="text-sm text-muted-foreground text-center">
+                            Chose your date first.
                         </p>
                     )}
                 </div>
             </section>
-        </section>
+        </motion.section>
     );
 }

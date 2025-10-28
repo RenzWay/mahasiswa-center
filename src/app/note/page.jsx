@@ -2,11 +2,11 @@
 import {motion} from "framer-motion";
 import {Button} from "@/components/ui/button";
 import {useCallback, useEffect, useState} from "react";
-import {formatDate} from "@/app/lib/formatdate";
 import {TiptapEditor} from "@/app/lib/tiptap";
 import {ArrowLeft} from "lucide-react";
 import {Input} from "@/components/ui/input";
-import ModelFirestore from "@/app/model/model";
+import ModelFirestore from "@/model/model";
+import {CardNoteList} from "@/app/lib/card";
 
 const Notes = new ModelFirestore();
 
@@ -48,7 +48,7 @@ export default function NotePage() {
     const handleAddNotes = async () => {
         const newNotes = {
             title: "Untitled Notes",
-            content: "",
+            content: "Write here...",
             date: new Date(),
             category: "Work"
         }
@@ -56,6 +56,17 @@ export default function NotePage() {
         setNotes((prev) => [...prev, fireNotes])
         setSelectedNotes(fireNotes)
     }
+
+    const handleDeleteNote = async (id) => {
+        try {
+            await Notes.deleteNote(id);
+            setNotes(prev => prev.filter(n => n.id !== id));
+            if (selectedNotes?.id === id) setSelectedNotes(null);
+        } catch (err) {
+            console.error("Gagal menghapus note:", err);
+        }
+    };
+
 
     return (
         <motion.section
@@ -109,23 +120,19 @@ export default function NotePage() {
                 </header>
             )}
 
-            <section className="flex gap-2 flex-1 overflow-hidden">
+            <section className="flex gap-2 flex-2 overflow-hidden">
                 {/* Sidebar - Hide on mobile when note selected */}
                 <section
                     className={`${selectedNotes ? 'hidden md:flex md:flex-col' : 'grid md:flex md:flex-col'} grid-cols-2 gap-2 md:gap-0 flex-1 md:border-r border-gray-200 overflow-y-auto p-4`}>
                     {notes.map((note, i) => (
-                        <div
-                            onClick={() => setSelectedNotes(note)}
-                            className={`bg-white dark:bg-gray-950 border rounded-lg p-4 cursor-pointer md:mb-2 hover:shadow-md transition-shadow 
-                            ${selectedNotes?.id === note.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} h-fit`}
+                        <CardNoteList
                             key={i}
-                        >
-                            <p className="font-semibold mb-1 truncate">{note.title}</p>
-                            <p className="text-xs text-gray-500 mb-2">{formatDate(note.date)}</p>
-                            <p className="text-sm text-gray-600 line-clamp-2"
-                               dangerouslySetInnerHTML={{__html: note.content}}/>
-                            <p className="text-xs text-gray-500 mt-2">{note.category}</p>
-                        </div>
+                            note={note}
+                            onSelect={setSelectedNotes}
+                            isSelected={selectedNotes?.id === note.id}
+                            handleDelete={handleDeleteNote}
+                        />
+
                     ))}
                 </section>
 
@@ -175,7 +182,7 @@ export default function NotePage() {
                         </div>
                     ) : (
                         <div className="flex items-center justify-center h-full text-gray-400">
-                            <p>Silahkan dipilih dulu</p>
+                            <p>Please choose first</p>
                         </div>
                     )}
                 </section>
