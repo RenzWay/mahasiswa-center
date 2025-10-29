@@ -23,6 +23,9 @@ export const metadata = {
     icons: {
         icon: "/colleger.png",
     },
+    verification: {
+        google: "2H2Xyrls9JrjPGKFIJz2wvgbSaV7jggvBxNLQKmrDVw",
+    },
 };
 
 export default function RootLayout({children}) {

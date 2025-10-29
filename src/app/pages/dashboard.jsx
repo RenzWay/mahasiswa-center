@@ -24,19 +24,19 @@ export default function DashboardPage() {
             name: "Pending Task",
             icon: BookIcon,
             handle: taskLength,
-            color: "blue",
+            color: "text-blue-500 border-b-blue-500",
         },
         {
             name: "Event Today",
             icon: CalendarDays,
             handle: scheduleLength,
-            color: "green",
+            color: "text-green-500 border-b-green-500",
         },
         {
             name: "Total Notes",
             icon: NotebookPen,
             handle: noteLength,
-            color: "purple",
+            color: "text-purple-500 border-b-purple-500",
         },
     ];
 
@@ -170,20 +170,21 @@ export default function DashboardPage() {
             {/* Grid Card */}
             <section role="main">
                 <header className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
                     {dashboardMiniTv.map((row, i) => (
                         <Card
                             key={i}
-                            className={`hover:shadow-md dark:shadow-white transition-shadow duration-300 border-b-[4px] border-b-${row.color}-500`}
+                            className={`hover:shadow-md dark:shadow-white transition-shadow duration-300 border-b-[4px] ${row.color}`}
                         >
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className={`text-sm font-medium text-${row.color}-500`}>
+                                <CardTitle className={`text-sm font-medium ${row.color.split(" ")[0]}`}>
                                     {row.name}
                                 </CardTitle>
-                                <row.icon className={`h-5 w-5 text-${row.color}-500`}/>
+                                <row.icon className={`h-5 w-5 ${row.color.split(" ")[0]}`}/>
                             </CardHeader>
                             <CardContent>
-                                <div className={`text-3xl font-bold text-${row.color}-500`}>{row.handle}</div>
+                                <div className={`text-3xl font-bold ${row.color.split(" ")[0]}`}>
+                                    {row.handle}
+                                </div>
                             </CardContent>
                         </Card>
                     ))}
