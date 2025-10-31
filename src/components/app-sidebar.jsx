@@ -12,12 +12,17 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import {Button} from "@/components/ui/button";
 import {useTheme} from "next-themes";
 import {useEffect, useState} from "react";
 import {Separator} from "@/components/ui/separator";
-import {CalendarDays, CheckSquare, LayoutDashboard, Moon, NotebookPen, Sun} from "lucide-react";
+import {CalendarDays, CheckSquare, LayoutDashboard, NotebookPen} from "lucide-react";
 import Image from "next/image";
+import {onAuthStateChanged} from "firebase/auth";
+import {auth} from "@/firebase/firebase";
+import ModelFirestore from "@/model/model";
+import {DropdownFooterSidebar} from "@/app/lib/dropdown";
+
+const model = new ModelFirestore();
 
 const menuItems = [
     {name: "Dashboard", icon: LayoutDashboard, href: "/"},
@@ -29,6 +34,17 @@ const menuItems = [
 export function AppSidebar() {
     const {theme, setTheme} = useTheme();
     const [mounted, setMounted] = useState(false);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        setMounted(true);
+
+        const unsubscribe = onAuthStateChanged(auth, (u) => {
+            setUser(u);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => setMounted(true), []);
     if (!mounted) return null; // Cegah mismatch dari SSR
@@ -41,9 +57,9 @@ export function AppSidebar() {
         <Sidebar>
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel className="font-bold text-xl select-none">
-                        <Image className="mr-4" src="/colleger.png" width={30} height={30}
-                               alt="icon mahasiswa"/> Mahasiswa Center
+                    <SidebarGroupLabel className="font-bold text-xl select-none flex items-center gap-2">
+                        <Image src="/colleger.png" width={30} height={30} alt="icon mahasiswa"/>
+                        Mahasiswa Center
                     </SidebarGroupLabel>
                     <Separator className="my-4"/>
                     <SidebarGroupContent>
@@ -65,27 +81,10 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+
             <SidebarFooter>
                 <Separator className="my-4"/>
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                        <Button
-                            variant="outline"
-                            onClick={toggleTheme}
-                            className="w-full flex items-center justify-between"
-                        >
-                            {theme === "light" ? (
-                                <>
-                                    <Sun className="mr-2 h-4 w-4"/> Light Mode
-                                </>
-                            ) : (
-                                <>
-                                    <Moon className="mr-2 h-4 w-4"/> Dark Mode
-                                </>
-                            )}
-                        </Button>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
+                <DropdownFooterSidebar theme={theme} setTheme={setTheme} toggleTheme={toggleTheme} user={user}/>
             </SidebarFooter>
         </Sidebar>
     );

@@ -8,6 +8,8 @@ import {Input} from "@/components/ui/input";
 import {PlusCircle, Trash2} from "lucide-react";
 import {motion} from "framer-motion";
 import ModelFirestore from "@/model/model";
+import {onAuthStateChanged} from "firebase/auth";
+import {auth} from "@/firebase/firebase";
 
 const Model = new ModelFirestore();
 
@@ -17,15 +19,28 @@ export default function SchedulePage() {
     const [newTitle, setNewTitle] = useState("");
 
     useEffect(() => {
-        const fetchSchedule = async () => {
-            const data = await Model.getAllSchedule();
-            setSchedule(data);
-        };
-        fetchSchedule();
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            if (!currentUser) {
+                console.warn("Belum login, arahkan ke halaman login");
+                // contoh redirect manual (kalau pakai next/navigation)
+                window.location.href = "/auth/login";
+                return;
+            }
+
+            try {
+                const data = await Model.getAllSchedule();
+                setSchedule(data);
+            } catch (err) {
+                console.error("Error fetching schedule:", err);
+            }
+        });
+
+        return () => unsubscribe();
     }, []);
 
+
     const handleAdd = async (e) => {
-        e.stopPropagation();
+        e.preventDefault();
         if (!newTitle.trim() || !date) return;
 
         const newItem = {

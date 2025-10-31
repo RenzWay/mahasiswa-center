@@ -2,10 +2,8 @@ import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 
 import {ThemeProvider} from "@/components/ThemeProvider";
-import {SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
-import {AppSidebar} from "@/components/app-sidebar";
-import PageTransition from "@/app/lib/page-transition";
-import Footer from "@/app/lib/footer";
+import {SidebarProvider} from "@/components/ui/sidebar";
+import ClientLayout from "@/components/clientLayout";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -18,24 +16,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+    icons: {
+        icon: {url: "/colleger.png", sizes: "256x256", type: "image/x-icon"},
+    },
     title: "Mahasiswa Center",
     description: "The Web App with new some surprise",
-    icons: {
-        icon: "/colleger.png",
-    },
+    // icons: {
+    //     icon: [
+    //         {rel: "icon", url: "/colleger.png", type: "image/png"},
+    //         {rel: "shortcut icon", url: "/colleger.png", type: "image/png"},
+    //         {rel: "apple-touch-icon", url: "/colleger.png", type: "image/png"},
+    //     ],
+    // },
     verification: {
         google: "2H2Xyrls9JrjPGKFIJz2wvgbSaV7jggvBxNLQKmrDVw",
     },
 };
 
 export default function RootLayout({children}) {
-
     return (
         <html lang="en" suppressHydrationWarning>
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-
         <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -43,14 +46,8 @@ export default function RootLayout({children}) {
             disableTransitionOnChange
         >
             <SidebarProvider>
-                <AppSidebar/>
-                <main className="flex-1">
-                    <SidebarTrigger/>
-                    <PageTransition>
-                        {children}
-                    </PageTransition>
-                    <Footer/>
-                </main>
+                {/* Client-side layout logic */}
+                <ClientLayout>{children}</ClientLayout>
             </SidebarProvider>
         </ThemeProvider>
         </body>
