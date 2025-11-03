@@ -143,7 +143,7 @@ export function CardTaskReorder({task, onComplete, setTask, onDelete}) {
                                 className="h-5 w-5 flex-shrink-0"
                             />
                             <h3
-                                className={`text-sm font-medium ${
+                                className={`text-sm font-medium break-words whitespace-pre-wrap ${
                                     task.complete ? "line-through text-gray-500" : ""
                                 }`}
                             >
@@ -202,7 +202,7 @@ export function CardTaskReorder({task, onComplete, setTask, onDelete}) {
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-2">
                                 <h3
-                                    className={`text-base font-medium truncate ${
+                                    className={`text-base font-medium break-words whitespace-pre-wrap ${
                                         task.complete ? "line-through text-gray-500" : ""
                                     }`}
                                 >

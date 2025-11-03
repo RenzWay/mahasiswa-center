@@ -29,7 +29,7 @@ export default class ModelFirestore {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 if (!user) {
                     // belum login → panggil handler redirect
-                    if (typeof handle === "function") handle("/auth/login");
+                    if (typeof handle === "function") handle("/pages/home");
                     reject(new Error("User belum login, redirect ke login page."));
                 } else {
                     // sudah login → lanjut

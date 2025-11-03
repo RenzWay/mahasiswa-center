@@ -64,7 +64,14 @@ export default function DashboardPage() {
     }, []);
 
     // === Loading / No Login ===
-    if (loading) return <p className="text-center py-10">Loading dashboard...</p>;
+    if (loading) {
+
+        return (
+            <div className="h-screen">
+                <p className="text-center py-10">Loading dashboard...</p>
+            </div>
+        )
+    }
     if (!user) return <p className="text-center py-10">Please login to access your dashboard.</p>;
 
     // === Dashboard Card Data ===

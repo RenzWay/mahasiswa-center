@@ -1,12 +1,11 @@
 "use client"
-
-import DashboardPage from "@/app/pages/dashboard";
+import LandingHome from "@/app/pages/home/page";
 
 export default function Home() {
 
     return (
         <main className="">
-            <DashboardPage/>
+            <LandingHome/>
         </main>
     );
 }

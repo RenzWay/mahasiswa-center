@@ -25,7 +25,7 @@ import {DropdownFooterSidebar} from "@/app/lib/dropdown";
 const model = new ModelFirestore();
 
 const menuItems = [
-    {name: "Dashboard", icon: LayoutDashboard, href: "/"},
+    {name: "Dashboard", icon: LayoutDashboard, href: "/pages/dashboard"},
     {name: "Task", icon: CheckSquare, href: "/task"},
     {name: "Schedule", icon: CalendarDays, href: "/schedule"},
     {name: "Note", icon: NotebookPen, href: "/note"},

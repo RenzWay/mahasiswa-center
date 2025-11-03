@@ -45,7 +45,6 @@ h6 {
 p {
     /*@apply text-base md:text-lg text-gray-700 dark:text-gray-300;*/
     line-height: 1.7;
-    margin-bottom: 1rem;
 }
 
 /* Optional: spacing tweak for readability */
