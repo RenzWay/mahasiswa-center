@@ -123,7 +123,7 @@ export default function NotePage() {
             <section className="flex gap-2 flex-2 overflow-hidden">
                 {/* Sidebar - Hide on mobile when note selected */}
                 <section
-                    className={`${selectedNotes ? 'hidden md:flex md:flex-col' : 'grid md:flex md:flex-col'} grid-cols-2 gap-2 md:gap-0 flex-1 md:border-r border-gray-200 overflow-y-auto p-4`}>
+                    className={`${selectedNotes ? 'hidden md:flex md:flex-col' : 'grid md:flex md:flex-col'} gap-2 md:gap-0 flex-1 md:border-r border-gray-200 overflow-y-auto p-4`}>
                     {notes.map((note, i) => (
                         <CardNoteList
                             key={i}
@@ -182,7 +182,7 @@ export default function NotePage() {
                         </div>
                     ) : (
                         <div className="flex items-center justify-center h-full text-gray-400">
-                            <p>Please choose first</p>
+                            <p>Please choose your note first to see</p>
                         </div>
                     )}
                 </section>

@@ -21,9 +21,9 @@ export const metadata = {
     description: "The Web App with new some surprise",
     icons: {
         icon: [
-            {rel: "icon", url: "/colleger.png", type: "image/png", sizes: "256x256"},
-            {rel: "shortcut icon", url: "/colleger.png", type: "image/png", sizes: "256x256"},
-            {rel: "apple-touch-icon", url: "/colleger.png", type: "image/png", sizes: "256x256"},
+            {rel: "icon", url: "/colleger.png", type: "image/png"},
+            {rel: "shortcut icon", url: "/colleger.png", type: "image/png"},
+            {rel: "apple-touch-icon", url: "/colleger.png", type: "image/png"},
         ],
     },
     verification: {
@@ -36,6 +36,7 @@ export default function RootLayout({children}) {
         <html lang="en" suppressHydrationWarning>
         <head>
             <link rel="manifest" href="/app.webmanifest"/>
+            <link href="/colleger.png" rel="icon" type="image/png"/>
         </head>
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}

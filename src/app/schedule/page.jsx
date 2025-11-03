@@ -5,7 +5,7 @@ import {Calendar} from "@/components/ui/calendar";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {PlusCircle, Trash2} from "lucide-react";
+import {Check, Pencil, PlusCircle, Trash2, X} from "lucide-react";
 import {motion} from "framer-motion";
 import ModelFirestore from "@/model/model";
 import {onAuthStateChanged} from "firebase/auth";
@@ -17,6 +17,8 @@ export default function SchedulePage() {
     const [date, setDate] = useState(new Date());
     const [schedule, setSchedule] = useState([]);
     const [newTitle, setNewTitle] = useState("");
+    const [editingId, setEditingId] = useState(null);
+    const [editingValue, setEditingValue] = useState("");
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -58,6 +60,24 @@ export default function SchedulePage() {
         setSchedule((prev) => prev.filter((item) => item.id !== id));
     };
 
+    const handleEdit = (item) => {
+        setEditingId(item.id);
+        setEditingValue(item.title);
+    };
+
+    const handleSave = async (id) => {
+        if (!editingValue.trim()) return;
+
+        await Model.updateSchedule(id, {title: editingValue});
+        setSchedule((prev) =>
+            prev.map((item) =>
+                item.id === id ? {...item, title: editingValue} : item
+            )
+        );
+        setEditingId(null);
+        setEditingValue("");
+    };
+
     const selectedSchedule = schedule.filter(
         (item) => new Date(item.date).toDateString() === date?.toDateString()
     );
@@ -70,15 +90,12 @@ export default function SchedulePage() {
             className="mx-auto mt-4 w-full max-w-5xl px-4 space-y-5"
         >
             <header className="text-center">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                    📆 Schedule Days
-                </h1>
+                <h1 className="text-2xl font-semibold tracking-tight">📆 Schedule Days</h1>
                 <p className="text-sm text-muted-foreground">
-                    Chose your schedule and add your activity
+                    Choose your schedule and add your activity
                 </p>
             </header>
 
-            {/* layout utama: kolom di mobile, flex di desktop */}
             <section className="flex flex-col md:flex-row gap-6">
                 {/* Kalender */}
                 <div className="rounded-lg border p-3 shadow-sm bg-card md:w-1/3">
@@ -94,7 +111,7 @@ export default function SchedulePage() {
                 <div className="rounded-lg border p-3 shadow-sm bg-card space-y-3 flex-1">
                     <form onSubmit={handleAdd} className="flex items-center gap-2">
                         <Input
-                            placeholder="Tambah jadwal..."
+                            placeholder="Add schedule..."
                             value={newTitle}
                             onChange={(e) => setNewTitle(e.target.value)}
                             className="text-sm"
@@ -125,16 +142,51 @@ export default function SchedulePage() {
                                             className="border border-muted shadow-sm hover:shadow-md transition-all"
                                         >
                                             <CardHeader className="flex flex-row justify-between items-center p-3">
-                                                <CardTitle className="text-sm font-medium truncate">
-                                                    {item.title}
-                                                </CardTitle>
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    onClick={() => handleDelete(item.id)}
-                                                >
-                                                    <Trash2 className="w-4 h-4 text-red-500"/>
-                                                </Button>
+                                                {editingId === item.id ? (
+                                                    <div className="flex items-center gap-2 w-full">
+                                                        <Input
+                                                            value={editingValue}
+                                                            onChange={(e) => setEditingValue(e.target.value)}
+                                                            className="text-sm flex-1"
+                                                        />
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            onClick={() => handleSave(item.id)}
+                                                        >
+                                                            <Check className="w-4 h-4 text-green-500"/>
+                                                        </Button>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            onClick={() => setEditingId(null)}
+                                                        >
+                                                            <X className="w-4 h-4 text-gray-400"/>
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <CardTitle className="text-sm font-medium truncate flex-1">
+                                                            {item.title}
+                                                        </CardTitle>
+                                                        <div className="flex gap-1">
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                onClick={() => handleEdit(item)}
+                                                            >
+                                                                <Pencil className="w-4 h-4 text-blue-500"/>
+                                                            </Button>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                onClick={() => handleDelete(item.id)}
+                                                            >
+                                                                <Trash2 className="w-4 h-4 text-red-500"/>
+                                                            </Button>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </CardHeader>
                                             <CardContent className="p-3 pt-0">
                                                 <p className="text-xs text-muted-foreground">
@@ -152,7 +204,7 @@ export default function SchedulePage() {
                         </>
                     ) : (
                         <p className="text-sm text-muted-foreground text-center">
-                            Chose your date first.
+                            Choose your date first.
                         </p>
                     )}
                 </div>
