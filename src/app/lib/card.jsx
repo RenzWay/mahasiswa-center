@@ -11,16 +11,15 @@ import {formatDate} from "@/app/lib/formatdate";
 
 export function CardQuickDashboard({title, description, content, className}) {
     return (
-        <Card className={className}>
-            <CardHeader>
-                <CardTitle>
-                    <h3>
-                        {title}
-                    </h3>
+        <Card
+            className={`shadow-3d hover:shadow-3d-pressed transition-all duration-300 bg-gradient-to-br from-slate-800 to-slate-900 text-white border border-slate-700 ${className}`}>
+            <CardHeader className="pb-3">
+                <CardTitle className="text-xl font-bold text-white">
+                    {title}
                 </CardTitle>
-                <CardContent>{description}</CardContent>
+                <p className="text-sm text-slate-300 mt-2">{description}</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
                 {content}
             </CardContent>
         </Card>
@@ -28,31 +27,54 @@ export function CardQuickDashboard({title, description, content, className}) {
 }
 
 export function CardScheduleMini({schedule = []}) {
-    const schedDate = (date) => {
-        const d = formatDate(date)
-        return d.toLocaleString("en-EN", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        })
-    }
     return (
-        <Card className="mb-4">
-            <CardHeader>
-                <CardTitle>{schedule.title}</CardTitle>
+        <Card
+            className="mb-4 shadow-3d hover:shadow-3d-pressed hover:glow-green hover:-translate-y-1 transition-all duration-300 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-white/10 dark:to-gray-50/5 border border-white/10">
+            {/*<div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-blue-500"/>*/}
+            <CardHeader className="pb-2">
+                <CardTitle className="text-white dark:text-gray-900 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/>
+                    {schedule.title}
+                </CardTitle>
             </CardHeader>
             <CardContent>
-                <p>{new Date(schedule.date).toLocaleDateString("en-En", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                })}</p>
+                <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <CalendarDays size={16} className="text-blue-400"/>
+                    <p>{new Date(schedule.date).toLocaleDateString("en-EN", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                    })}</p>
+                </div>
             </CardContent>
         </Card>
     )
 }
+
+export function CardNoteMini({notes = []}) {
+    return (
+        <div className="space-y-2">
+            <div
+                className="flex flex-col p-4 rounded-xl border border-white/10 shadow-3d hover:shadow-3d-pressed hover:glow-purple hover:translate-x-1 transition-all duration-300 mb-4 bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+                <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold text-white truncate">
+                        {notes.title || "Untitled Note"}
+                    </h4>
+                    <div className="w-2 h-2 rounded-full bg-purple-500"/>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                    <CalendarDays size={12} className="text-purple-400"/>
+                    {formatDate(notes.date)}
+                </div>
+
+                <p className="text-xs text-slate-300 line-clamp-2" dangerouslySetInnerHTML={{__html: notes.content}}/>
+            </div>
+        </div>
+    );
+}
+
 
 export function CardNoteList({note, onSelect, isSelected, handleDelete}) {
     return (
@@ -100,35 +122,13 @@ export function CardNoteList({note, onSelect, isSelected, handleDelete}) {
     );
 }
 
-export function CardNoteMini({notes = []}) {
-    return (
-        <div className="space-y-2">
-            <div
-                className="flex flex-col p-3 rounded-lg border border-border hover:bg-accent transition-colors mb-4"
-            >
-                <h4 className="text-sm font-medium truncate">
-                    {notes.title || "Untitled Note"}
-                </h4>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                    <CalendarDays size={12}/>
-                    {formatDate(notes.date)}
-                </div>
-                <p
-                    className="text-xs text-muted-foreground mt-1 line-clamp-2"
-                    dangerouslySetInnerHTML={{__html: notes.content}}
-                />
-            </div>
-        </div>
-    );
-}
-
 export function CardTaskReorder({task, onComplete, setTask, onDelete}) {
     return (
         <Reorder.Item value={task} className="mb-3 sm:mb-4">
             <Card
                 className={`transition-all w-full ${
                     task.complete
-                        ? "border-green-500/50 bg-green-50 dark:bg-green-900/20"
+                        ? "border-green-500/50 bg-green-50 dark:bg-gray-900"
                         : "border-gray-300 hover:shadow-md"
                 }`}
             >

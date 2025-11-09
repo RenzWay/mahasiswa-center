@@ -39,7 +39,7 @@ export default function RootLayout({children}) {
             <link href="/colleger.png" rel="icon" type="image/png"/>
         </head>
         <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-slate-800`}
         >
         <ThemeProvider
             attribute="class"

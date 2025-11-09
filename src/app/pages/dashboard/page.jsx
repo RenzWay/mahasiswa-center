@@ -12,6 +12,8 @@ import ModelFirestore from "@/model/model";
 import {CardNoteMini, CardQuickDashboard, CardScheduleMini} from "@/app/lib/card";
 import {formatDate} from "@/app/lib/formatdate";
 import {useRouter} from "next/navigation";
+import {LoadingDashboard} from "@/app/lib/loading";
+import Image from "next/image";
 
 const Model = new ModelFirestore();
 
@@ -24,13 +26,37 @@ export default function DashboardPage() {
     const [notes, setNotes] = useState([]);
     const [schedule, setSchedule] = useState([]);
 
+    // === State Length Dashboard ===
     // === Derived Data ===
-    const taskLength = tasks.length;
-    const noteLength = notes.length;
-    const scheduleLength = schedule.length;
+    const [taskLength, setTaskLength] = useState([]);
+    const [notesLength, setNotesLength] = useState([])
+    const [scheduleLength, setScheduleLength] = useState([])
+
+    // === State DateTime ===
+    const [dateTime, setDateTime] = useState(new Date());
 
     // === Router Syntax ===
     const router = useRouter();
+
+    // === DateTime ===
+    useEffect(() => {
+        const interval = setInterval(() => setDateTime(new Date()), 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const formatted = dateTime.toLocaleString("en-EN", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+
+    const formattedTime = dateTime.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+    });
 
     // === Auth Listener & Data Fetch ===
     useEffect(() => {
@@ -50,6 +76,10 @@ export default function DashboardPage() {
                     Model.getAllSchedule(),
                 ]);
 
+                setTaskLength(tasksRes.length);
+                setNotesLength(notesRes.length);
+                setScheduleLength(scheduleRes.length);
+
                 setTasks(tasksRes.slice(0, 3));
                 setNotes(notesRes.slice(0, 3));
                 setSchedule(scheduleRes.slice(0, 3));
@@ -65,10 +95,9 @@ export default function DashboardPage() {
 
     // === Loading / No Login ===
     if (loading) {
-
         return (
             <div className="h-screen">
-                <p className="text-center py-10">Loading dashboard...</p>
+                <LoadingDashboard/>
             </div>
         )
     }
@@ -80,21 +109,22 @@ export default function DashboardPage() {
             name: "Pending Task",
             icon: BookIcon,
             handle: taskLength,
-            color: "text-blue-500 border-b-blue-500",
+            color: "text-blue-600 border-b-blue-400",
         },
         {
             name: "Event Today",
             icon: CalendarDays,
             handle: scheduleLength,
-            color: "text-green-500 border-b-green-500",
+            color: "text-green-600 border-b-green-400 ",
         },
         {
             name: "Total Notes",
             icon: NotebookPen,
-            handle: noteLength,
-            color: "text-purple-500 border-b-purple-500",
+            handle: notesLength,
+            color: "text-purple-600 border-b-purple-400",
         },
     ];
+
 
     const quickDashboard = [
         {
@@ -106,7 +136,7 @@ export default function DashboardPage() {
                         tasks.map((task, index) => (
                             <div
                                 key={index}
-                                className="flex items-center gap-3 p-3 mb-4 rounded-lg border border-border hover:bg-accent transition-colors"
+                                className="flex items-center gap-3 p-3 mb-4 rounded-lg border border-border hover:bg-accent hover:text-slate-200 transition-colors"
                             >
                                 <Checkbox checked={task.complete} className="h-4 w-4"/>
                                 <div className="flex-1">
@@ -129,7 +159,8 @@ export default function DashboardPage() {
                     )}
                     <div className="pt-4">
                         <Link href="/task" className="w-full">
-                            <Button className="w-full" variant="outline">
+                            <Button
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-3d hover:shadow-3d-pressed transition-all duration-300">
                                 See Your Task →
                             </Button>
                         </Link>
@@ -149,7 +180,8 @@ export default function DashboardPage() {
                     )}
                     <div className="pt-4">
                         <Link href="/schedule" className="w-full">
-                            <Button className="w-full" variant="outline">
+                            <Button
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-3d hover:shadow-3d-pressed transition-all duration-300">
                                 See Your Schedule →
                             </Button>
                         </Link>
@@ -169,7 +201,8 @@ export default function DashboardPage() {
                     )}
                     <div className="pt-4">
                         <Link href="/note" className="w-full">
-                            <Button className="w-full" variant="outline">
+                            <Button
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-3d hover:shadow-3d-pressed transition-all duration-300">
                                 See Your Notes →
                             </Button>
                         </Link>
@@ -189,11 +222,31 @@ export default function DashboardPage() {
             className="mx-4 mt-4"
         >
             {/* === Header === */}
-            <header className="mb-6">
-                <h3 className="dark:text-blue-200 text-blue-600 font-bold">Dashboard</h3>
-                <p className="text-sm text-muted-foreground">
-                    Welcome back, {user.displayName || user.email}
-                </p>
+            <header
+                className="mb-6 p-6 rounded-2xl shadow-3d bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:to-gray-100 dark:text-gray-950 text-white border border-white/10">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h3 className="text-2xl font-bold bg-slate-800 bg-clip-text text-transparent">
+                            Dashboard
+                        </h3>
+                        <p className="text-sm text-slate-400 mt-1">
+                            Welcome back, {user.displayName || user.email}
+                        </p>
+                    </div>
+
+                    <div className="ml-auto flex flex-col items-end text-right gap-2">
+                        <p className="text-sm font-medium text-slate-300">
+                            {formatted}
+                        </p>
+                        <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl shadow-3d-pressed">
+                            <Image src={`/clock.png`} alt="clock icon" width={30} height={30}/>
+                            <span
+                                className="text-xl font-bold tracking-widest bg-gray-700 bg-clip-text text-transparent">
+                                {formattedTime}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </header>
 
             {/* === Top Summary Cards === */}
@@ -201,18 +254,19 @@ export default function DashboardPage() {
                 {dashboardMiniTv.map((row, i) => (
                     <Card
                         key={i}
-                        className={`hover:shadow-md dark:shadow-white transition-shadow duration-300 border-b-[4px] ${row.color}`}
+                        className={`shadow-3d hover:shadow-3d-pressed hover:-translate-y-1 transition-all duration-300 border-b-4 ${row.color} bg-gradient-to-br from-gray-900/90 to-gray-800/90 dark:from-white/10 dark:to-gray-50/5 border border-white/10`}
                     >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className={`text-sm font-medium ${row.color.split(" ")[0]}`}>
                                 {row.name}
                             </CardTitle>
-                            <row.icon className={`h-5 w-5 ${row.color.split(" ")[0]}`}/>
+                            <row.icon className={`h-6 w-6 ${row.color.split(" ")[0]}`}/>
                         </CardHeader>
                         <CardContent>
-                            <div className={`text-3xl font-bold ${row.color.split(" ")[0]}`}>
+                            <div className={`text-4xl font-bold ${row.color.split(" ")[0]}`}>
                                 {row.handle}
                             </div>
+                            <p className="text-xs text-slate-400 mt-2">Total items</p>
                         </CardContent>
                     </Card>
                 ))}
@@ -226,7 +280,7 @@ export default function DashboardPage() {
                         title={item.title}
                         description={item.description}
                         content={item.content}
-                        className="hover:shadow-md dark:shadow-white transition-shadow duration-300"
+                        // className="hover:shadow-md dark:shadow-white transition-shadow duration-300 bg-gray-900 dark:bg-white text-white dark:text-black"
                     />
                 ))}
             </section>

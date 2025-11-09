@@ -11,12 +11,28 @@ export default class ModelFirestore {
     #notes = collection(db, "notes");
     #schedule = collection(db, "schedule");
 
-    #getUser() {
-        const user = auth.currentUser;
-        if (!user) {
-            throw new Error("The user is not logged in yet");
-        }
-        return user;
+    // ✅ UBAH INI: Dari synchronous jadi async
+    async #getUser() {
+        return new Promise((resolve, reject) => {
+            // Cek current user dulu (fast path)
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                resolve(currentUser);
+                return;
+            }
+
+            // Kalau null, tunggu auth state initialize
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                unsubscribe();
+
+                if (!user) {
+                    alert("You must login first!");
+                    reject(new Error("The user is not logged in yet"));
+                } else {
+                    resolve(user);
+                }
+            });
+        });
     }
 
     /**
@@ -27,6 +43,7 @@ export default class ModelFirestore {
     async loginFirst(handle) {
         return new Promise((resolve, reject) => {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
+                unsubscribe();
                 if (!user) {
                     // belum login → panggil handler redirect
                     if (typeof handle === "function") handle("/pages/home");
@@ -35,7 +52,6 @@ export default class ModelFirestore {
                     // sudah login → lanjut
                     resolve(user);
                 }
-                unsubscribe();
             });
         });
     }
@@ -71,7 +87,7 @@ export default class ModelFirestore {
     */
     async getAllTask() {
         try {
-            const user = this.#getUser();
+            const user = await this.#getUser(); // ✅ TAMBAH AWAIT
             if (!user) return [];
             const q = query(this.#task, where("email", "==", user.email));
             const response = await getDocs(q);
@@ -84,7 +100,7 @@ export default class ModelFirestore {
 
     async addTask(newTask) {
         try {
-            const user = this.#getUser();
+            const user = await this.#getUser(); // ✅ TAMBAH AWAIT
             const data = {...newTask, email: user.email}; // simpan email
             const response = await addDoc(this.#task, data);
             return {id: response.id, ...data};
@@ -121,7 +137,7 @@ export default class ModelFirestore {
     */
     async getAllNotes() {
         try {
-            const user = this.#getUser();
+            const user = await this.#getUser(); // ✅ TAMBAH AWAIT
             const q = query(this.#notes, where("email", "==", user.email));
             const res = await getDocs(q);
             return res.docs.map((doc) => ({id: doc.id, ...doc.data()}));
@@ -133,7 +149,7 @@ export default class ModelFirestore {
 
     async addNote(newNote) {
         try {
-            const user = this.#getUser();
+            const user = await this.#getUser(); // ✅ TAMBAH AWAIT
             const data = {...newNote, email: user.email};
             const docRef = await addDoc(this.#notes, data);
             return {id: docRef.id, ...data};
@@ -168,7 +184,7 @@ export default class ModelFirestore {
     */
     async getAllSchedule() {
         try {
-            const user = this.#getUser();
+            const user = await this.#getUser(); // ✅ TAMBAH AWAIT
             const q = query(this.#schedule, where("email", "==", user.email));
             const sched = await getDocs(q);
             return sched.docs.map((doc) => ({id: doc.id, ...doc.data()}));
@@ -180,7 +196,7 @@ export default class ModelFirestore {
 
     async addSchedule(newSchedule) {
         try {
-            const user = this.#getUser();
+            const user = await this.#getUser(); // ✅ TAMBAH AWAIT
             const data = {...newSchedule, email: user.email};
             const sched = await addDoc(this.#schedule, data);
             return {id: sched.id, ...data};
