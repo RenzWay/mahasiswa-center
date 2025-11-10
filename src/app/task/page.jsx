@@ -117,27 +117,31 @@ export default function TaskPage() {
     return (
         <section className="mx-4">
             {/* Header */}
-            <header className="flex justify-between items-center px-8 mb-8 border-b py-4">
-                <h4 className="text-2xl font-semibold">Task Page</h4>
-
+            <header
+                className="flex justify-between items-center px-8 mb-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-blue-100 dark:from-slate-900 dark:to-slate-800 shadow-sm border border-indigo-100 dark:border-slate-700">
+                <h4 className="text-2xl font-bold text-slate-800 dark:text-white">Task Page</h4>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Dialog open={open} onOpenChange={setOpen}>
                             <DialogTrigger asChild>
-                                <Button>+ Add Task</Button>
+                                <Button>
+                                    + Add Task
+                                </Button>
                             </DialogTrigger>
 
-                            <DialogContent className="sm:max-w-[425px]">
+                            <DialogContent
+                                className="sm:max-w-[425px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl">
                                 <DialogHeader>
-                                    <DialogTitle>Add Your Task</DialogTitle>
-                                    <DialogDescription>
+                                    <DialogTitle className="text-xl font-semibold text-slate-800 dark:text-white">Add
+                                        Your Task</DialogTitle>
+                                    <DialogDescription className="text-slate-500 dark:text-slate-400">
                                         What do you need to get done? Add it to your list.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                                    <Label htmlFor="title">Task</Label>
-                                    <Input type="text" id="title" onChange={(e) => setTitle(e.target.value)}
-                                           placeholder="write it down before you forget 😭"/>
+                                    <Label htmlFor="title" className="text-slate-700 dark:text-slate-300">Task</Label>
+                                    <Input
+                                        className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"/>
                                     <Calendar28 setDate={setDate} title="Due Date"/>
                                     <Button type="submit" className="w-full">
                                         {submitting ?
@@ -149,18 +153,30 @@ export default function TaskPage() {
                     </TooltipTrigger>
 
                     <TooltipContent>
-                        <p className="dark:text-black text-white">Add your task now</p>
+                        <p className="text-slate-700 dark:text-slate-200">Add your task now</p>
                     </TooltipContent>
                 </Tooltip>
             </header>
 
             {/* Main Tabs */}
-            <section role="main">
+            <section className="mx-4 bg-white dark:bg-slate-900 min-h-screen rounded-2xl p-6 shadow-inner" role="main">
                 <Tabs defaultValue="all">
-                    <TabsList>
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        <TabsTrigger value="active">Active</TabsTrigger>
-                        <TabsTrigger value="complete">Complete</TabsTrigger>
+                    <TabsList className="bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+                        <TabsTrigger
+                            value="all"
+                            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white text-slate-700 dark:text-slate-300 rounded-lg transition-all">
+                            All
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="active"
+                            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-500 data-[state=active]:text-white text-slate-700 dark:text-slate-300 rounded-lg transition-all">
+                            Active
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="complete"
+                            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-slate-700 dark:text-slate-300 rounded-lg transition-all">
+                            Complete
+                        </TabsTrigger>
                     </TabsList>
 
 

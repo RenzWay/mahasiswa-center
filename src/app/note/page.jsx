@@ -7,6 +7,7 @@ import {ArrowLeft} from "lucide-react";
 import {Input} from "@/components/ui/input";
 import ModelFirestore from "@/model/model";
 import {CardNoteList} from "@/app/lib/card";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const Notes = new ModelFirestore();
 
@@ -50,7 +51,7 @@ export default function NotePage() {
             title: "Untitled Notes",
             content: "Write here...",
             date: new Date(),
-            category: "Work"
+            category: "None"
         }
         const fireNotes = await Notes.addNote(newNotes);
         setNotes((prev) => [...prev, fireNotes])
@@ -82,10 +83,34 @@ export default function NotePage() {
             className="h-screen flex flex-col">
 
             {/* Header - Desktop only */}
-            <header className="hidden md:flex mx-4 justify-between border-b py-4">
-                <h2 className="text-xl font-semibold">Note your day</h2>
-                <Button onClick={handleAddNotes}>+ Note</Button>
+            <header
+                className="
+    hidden md:flex items-center justify-between
+    mx-4 mt-2 mb-3 px-6 py-4
+    rounded-2xl border border-white/20
+    bg-gradient-to-r from-blue-100/70 via-indigo-100/70 to-purple-100/70
+    dark:from-slate-800/60 dark:via-slate-900/60 dark:to-gray-800/60
+    backdrop-blur-md shadow-md
+    transition-all duration-300
+  "
+            >
+                <div>
+                    <h2 className="text-2xl font-bold bg-clip-text">
+                        📝 Note your day
+                    </h2>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                        Write. Organize. Remember everything.
+                    </p>
+                </div>
+
+                <Button
+                    onClick={handleAddNotes}
+                    className="  bg-gradient-to-r from-blue-500 to-indigo-500 text-white  hover:from-indigo-500 hover:to-blue-500  shadow-md hover:shadow-lg transition-all"
+                >
+                    + New Note
+                </Button>
             </header>
+
 
             {/* Mobile Header - Show in list view */}
             {!selectedNotes && (
@@ -117,6 +142,27 @@ export default function NotePage() {
                         handleTitleChange(selectedNotes.id, newTitle);
                     }}
                            value={selectedNotes.title}/>
+
+                    <Select
+                        value={selectedNotes.category || ""}
+                        onValueChange={async (newCategory) => {
+                            const updatedNote = {...selectedNotes, category: newCategory};
+                            setSelectedNotes(updatedNote);
+                            setNotes(notes.map(n => n.id === selectedNotes.id ? updatedNote : n));
+                            await Notes.updateNote(selectedNotes.id, {category: newCategory});
+                        }}
+                    >
+                        <SelectTrigger className="w-[130px] text-sm">
+                            <SelectValue placeholder="No category"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="None">No category</SelectItem>
+                            <SelectItem value="Work">Work</SelectItem>
+                            <SelectItem value="Personal">Personal</SelectItem>
+                            <SelectItem value="Study">Study</SelectItem>
+                            <SelectItem value="Ideas">Ideas</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </header>
             )}
 
@@ -144,7 +190,7 @@ export default function NotePage() {
                     {selectedNotes ? (
                         <div className="flex flex-col h-full">
                             {/* Title Input - Desktop only (mobile ada di header) */}
-                            <div className="hidden md:block p-4 border-b">
+                            <div className="hidden md:flex items-center gap-3 p-4 border-b">
                                 <input
                                     type="text"
                                     value={selectedNotes.title}
@@ -157,9 +203,31 @@ export default function NotePage() {
                                         setSelectedNotes({...selectedNotes, title: newTitle});
                                         handleTitleChange(selectedNotes.id, newTitle);
                                     }}
-                                    className="w-full text-2xl font-bold border-none outline-none"
+                                    className="flex-1 text-2xl font-bold border-none outline-none bg-transparent"
                                     placeholder="Note title..."
                                 />
+
+                                <Select
+                                    value={selectedNotes.category || ""}
+                                    onValueChange={async (newCategory) => {
+                                        const updatedNote = {...selectedNotes, category: newCategory};
+                                        setSelectedNotes(updatedNote);
+                                        setNotes(notes.map(n => n.id === selectedNotes.id ? updatedNote : n));
+                                        await Notes.updateNote(selectedNotes.id, {category: newCategory});
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[130px] text-sm">
+                                        <SelectValue placeholder="No category"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="None">No category</SelectItem>
+                                        <SelectItem value="Work">Work</SelectItem>
+                                        <SelectItem value="Personal">Personal</SelectItem>
+                                        <SelectItem value="Study">Study</SelectItem>
+                                        <SelectItem value="Ideas">Ideas</SelectItem>
+                                    </SelectContent>
+                                </Select>
+
                             </div>
 
                             {/* Editor */}

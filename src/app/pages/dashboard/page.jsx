@@ -136,7 +136,7 @@ export default function DashboardPage() {
                         tasks.map((task, index) => (
                             <div
                                 key={index}
-                                className="flex items-center gap-3 p-3 mb-4 rounded-lg border border-border hover:bg-accent hover:text-slate-200 transition-colors"
+                                className="flex items-center gap-3 p-3 mb-4 rounded-lg border border-border hover:bg-accent dark:hover:text-slate-200 hover:text-black transition-colors"
                             >
                                 <Checkbox checked={task.complete} className="h-4 w-4"/>
                                 <div className="flex-1">
@@ -223,39 +223,42 @@ export default function DashboardPage() {
         >
             {/* === Header === */}
             <header
-                className="mb-6 p-6 rounded-2xl shadow-3d bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:to-gray-100 dark:text-gray-950 text-white border border-white/10">
+                className="mb-6 p-6 rounded-2xl shadow-3d bg-gradient-to-br from-blue-50 via-indigo-100 to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 border border-indigo-200 dark:border-white/10 text-slate-800 dark:text-white transition-all duration-500"
+            >
                 <div className="flex justify-between items-center">
                     <div>
-                        <h3 className="text-2xl font-bold bg-slate-800 bg-clip-text text-transparent">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent dark:from-slate-200 dark:to-white">
                             Dashboard
                         </h3>
-                        <p className="text-sm text-slate-400 mt-1">
+                        <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                             Welcome back, {user.displayName || user.email}
                         </p>
                     </div>
 
                     <div className="ml-auto flex flex-col items-end text-right gap-2">
-                        <p className="text-sm font-medium text-slate-300">
+                        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
                             {formatted}
                         </p>
-                        <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl shadow-3d-pressed">
+                        <div
+                            className="flex items-center gap-3 bg-white/50 dark:bg-white/5 px-4 py-2 rounded-xl shadow-3d-pressed backdrop-blur-sm">
                             <Image src={`/clock.png`} alt="clock icon" width={30} height={30}/>
                             <span
-                                className="text-xl font-bold tracking-widest bg-gray-700 bg-clip-text text-transparent">
-                                {formattedTime}
+                                className="text-xl font-bold tracking-widest text-slate-800 dark:text-slate-100">{formattedTime}
                             </span>
                         </div>
                     </div>
                 </div>
             </header>
 
+
             {/* === Top Summary Cards === */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {dashboardMiniTv.map((row, i) => (
                     <Card
                         key={i}
-                        className={`shadow-3d hover:shadow-3d-pressed hover:-translate-y-1 transition-all duration-300 border-b-4 ${row.color} bg-gradient-to-br from-gray-900/90 to-gray-800/90 dark:from-white/10 dark:to-gray-50/5 border border-white/10`}
+                        className={`shadow-3d hover:shadow-3d-pressed hover:-translate-y-1 transition-all duration-300 border-b-4 ${row.color} bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900/90 dark:to-gray-800/90 border border-indigo-200 dark:border-white/10`}
                     >
+
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className={`text-sm font-medium ${row.color.split(" ")[0]}`}>
                                 {row.name}
@@ -280,7 +283,7 @@ export default function DashboardPage() {
                         title={item.title}
                         description={item.description}
                         content={item.content}
-                        // className="hover:shadow-md dark:shadow-white transition-shadow duration-300 bg-gray-900 dark:bg-white text-white dark:text-black"
+                        // className={`shadow-3d hover:shadow-3d-pressed transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-100  dark:from-sky-200 dark:to-blue-100  text-slate-800 dark:text-slate-800 border border-indigo-200 dark:border-blue-300 ${className}`}
                     />
                 ))}
             </section>

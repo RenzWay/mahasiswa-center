@@ -12,64 +12,78 @@ import {formatDate} from "@/app/lib/formatdate";
 export function CardQuickDashboard({title, description, content, className}) {
     return (
         <Card
-            className={`shadow-3d hover:shadow-3d-pressed transition-all duration-300 bg-gradient-to-br from-slate-800 to-slate-900 text-white border border-slate-700 ${className}`}>
+            className={`shadow-3d hover:shadow-3d-pressed transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900 text-slate-800 dark:text-white border border-indigo-200 dark:border-slate-700 ${className}`}
+        >
             <CardHeader className="pb-3">
-                <CardTitle className="text-xl font-bold text-white">
+                <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">
                     {title}
                 </CardTitle>
-                <p className="text-sm text-slate-300 mt-2">{description}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                    {description}
+                </p>
             </CardHeader>
-            <CardContent className="pt-0">
-                {content}
-            </CardContent>
+            <CardContent className="pt-0">{content}</CardContent>
         </Card>
-    )
+    );
 }
+
 
 export function CardScheduleMini({schedule = []}) {
     return (
         <Card
-            className="mb-4 shadow-3d hover:shadow-3d-pressed hover:glow-green hover:-translate-y-1 transition-all duration-300 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-white/10 dark:to-gray-50/5 border border-white/10">
-            {/*<div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-blue-500"/>*/}
+            className="  mb-4 shadow-3d hover:shadow-3d-pressed hover:glow-green hover:-translate-y-1  transition-all duration-300  bg-gradient-to-br from-emerald-50 to-teal-100  dark:from-slate-900 dark:to-stone-900  border border-emerald-200 dark:border-slate-700"
+        >
             <CardHeader className="pb-2">
-                <CardTitle className="text-white dark:text-gray-900 flex items-center gap-2">
+                <CardTitle className="text-slate-700 dark:text-emerald-200 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/>
                     {schedule.title}
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex items-center gap-2 text-slate-400 text-sm">
-                    <CalendarDays size={16} className="text-blue-400"/>
-                    <p>{new Date(schedule.date).toLocaleDateString("en-EN", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                    })}</p>
+                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+                    <CalendarDays
+                        size={16}
+                        className="text-emerald-600 dark:text-emerald-400"
+                    />
+                    <p>
+                        {new Date(schedule.date).toLocaleDateString("en-EN", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                        })}
+                    </p>
                 </div>
             </CardContent>
         </Card>
-    )
+    );
 }
 
 export function CardNoteMini({notes = []}) {
     return (
         <div className="space-y-2">
             <div
-                className="flex flex-col p-4 rounded-xl border border-white/10 shadow-3d hover:shadow-3d-pressed hover:glow-purple hover:translate-x-1 transition-all duration-300 mb-4 bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+                className="  flex flex-col p-4 rounded-xl border border-indigo-200 dark:border-slate-700  shadow-3d hover:shadow-3d-pressed hover:glow-purple hover:translate-x-1  transition-all duration-300 mb-4  bg-gradient-to-br from-indigo-50 to-purple-100  dark:from-slate-950 dark:to-neutral-950"
+            >
                 <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-semibold text-white truncate">
+                    <h4 className="text-sm font-semibold text-slate-800 dark:text-indigo-100 truncate">
                         {notes.title || "Untitled Note"}
                     </h4>
                     <div className="w-2 h-2 rounded-full bg-purple-500"/>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                    <CalendarDays size={12} className="text-purple-400"/>
+                <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 mb-2">
+                    <CalendarDays
+                        size={12}
+                        className="text-purple-600 dark:text-purple-400"
+                    />
                     {formatDate(notes.date)}
                 </div>
 
-                <p className="text-xs text-slate-300 line-clamp-2" dangerouslySetInnerHTML={{__html: notes.content}}/>
+                <p
+                    className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2"
+                    dangerouslySetInnerHTML={{__html: notes.content}}
+                />
             </div>
         </div>
     );
@@ -81,29 +95,36 @@ export function CardNoteList({note, onSelect, isSelected, handleDelete}) {
         <Card
             onClick={() => onSelect(note)}
             className={`
-        cursor-pointer transition-all border h-fit
-        ${isSelected ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-border hover:shadow-md"}
-        dark:hover:shadow-white mb-4
-      `}
+    cursor-pointer transition-all duration-300 h-fit rounded-xl
+    ${isSelected
+                ? "border-indigo-400 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/30 dark:to-slate-900"
+                : "border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/60"}
+    mb-4 shadow-sm hover:shadow-lg
+  `}
         >
+
             <CardHeader className="p-4 pb-1">
-                <h4 className=" truncate">
+                <h4 className="truncate font-semibold text-slate-800 dark:text-slate-100">
                     {note.title || "Untitled Note"}
                 </h4>
-                <p className="text-xs text-muted-foreground">{formatDate(note.date)}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {formatDate(note.date)}
+                </p>
             </CardHeader>
 
             <CardContent className="p-4 pt-2">
-                {/* Preview content (max 2 lines) */}
                 <div
-                    className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-2"
+                    className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2 mb-2"
                     dangerouslySetInnerHTML={{__html: note.content}}
                 />
-                {/* Category */}
                 {note.category && (
-                    <Badge className="text-xs mt-1">{note.category}</Badge>
+                    <Badge
+                        className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs mt-1">
+                        {note.category}
+                    </Badge>
                 )}
             </CardContent>
+
             <CardFooter>
                 <CardAction>
                     <Button
@@ -126,12 +147,9 @@ export function CardTaskReorder({task, onComplete, setTask, onDelete}) {
     return (
         <Reorder.Item value={task} className="mb-3 sm:mb-4">
             <Card
-                className={`transition-all w-full ${
-                    task.complete
-                        ? "border-green-500/50 bg-green-50 dark:bg-gray-900"
-                        : "border-gray-300 hover:shadow-md"
-                }`}
+                className={`transition-all w-full max-w-[1000px] border rounded-2xl ${task.complete ? "bg-gradient-to-br from-green-50 to-emerald-100 dark:from-emerald-900/60 dark:to-green-950 border-emerald-400 dark:border-emerald-700" : "bg-gradient-to-br from-white to-slate-50 dark:from-slate-800/80 dark:to-slate-900/60 border-slate-200 dark:border-slate-700 hover:shadow-lg hover:shadow-slate-200/40 dark:hover:shadow-slate-800/50"}`}
             >
+
                 <CardContent className="p-3 sm:p-4">
                     {/* === MOBILE VIEW (default) === */}
                     <div className="flex flex-col gap-2 sm:hidden">

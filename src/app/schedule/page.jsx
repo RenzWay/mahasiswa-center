@@ -87,7 +87,10 @@ export default function SchedulePage() {
             initial={{opacity: 0, y: 20}}
             animate={{opacity: 1, y: 0}}
             transition={{duration: 0.4}}
-            className="mx-auto mt-4 w-full max-w-5xl px-4 space-y-5"
+            className="mx-auto mt-4 w-full max-w-5xl px-4 space-y-5
+             bg-gradient-to-br from-sky-50 to-indigo-50
+             dark:from-slate-900 dark:to-slate-950
+             rounded-2xl p-6 shadow-inner"
         >
             <header className="text-center">
                 <h1 className="text-2xl font-semibold tracking-tight">📆 Schedule Days</h1>
@@ -139,7 +142,7 @@ export default function SchedulePage() {
                                     {selectedSchedule.map((item) => (
                                         <Card
                                             key={item.id}
-                                            className="border border-muted shadow-sm hover:shadow-md transition-all"
+                                            className="transition-all border rounded-xl shadow-sm hover:shadow-md bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500/50"
                                         >
                                             <CardHeader className="flex flex-row justify-between items-center p-3">
                                                 {editingId === item.id ? (
