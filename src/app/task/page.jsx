@@ -141,7 +141,10 @@ export default function TaskPage() {
                                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                                     <Label htmlFor="title" className="text-slate-700 dark:text-slate-300">Task</Label>
                                     <Input
-                                        className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"/>
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500"
+                                    />
                                     <Calendar28 setDate={setDate} title="Due Date"/>
                                     <Button type="submit" className="w-full">
                                         {submitting ?
@@ -186,7 +189,7 @@ export default function TaskPage() {
                             <EmptyTask
                                 title="There no task"
                                 icon={<FileXIcon/>}
-                                description="Please add some task since no empty"
+                                description="Still empty here. Drop a new task"
                                 onHandle={() => setOpen(true)}
                             />
                         ) : (

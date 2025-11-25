@@ -65,7 +65,7 @@ export default function LandingHome() {
 
     return (
         <>
-            <main className="h-auto bg-gradient-to-tl from-sky-900 to-sky-950 text-white">
+            <main className="h-auto bg-gradient-to-tl from-sky-900 to-sky-950 text-white scroll-smooth">
                 {/* NAVBAR */}
                 <header
                     className="sticky top-0 z-50 bg-white/20 dark:bg-gray-800/30 backdrop-blur-sm border-b border-white/30 dark:border-gray-700/40">
@@ -97,13 +97,13 @@ export default function LandingHome() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/about" className="hover:text-blue-500 transition">
+                                    <Link href="#about" className="hover:text-blue-500 transition">
                                         About
                                     </Link>
                                 </li>
                             </ul>
                             <Link href="/auth/register">
-                                <Button className="text-sm sm:text-base px-4 py-2 sm:px-6">
+                                <Button variant="secondary" className="text-sm sm:text-base px-4 py-2 sm:px-6">
                                     Start for free
                                 </Button>
                             </Link>
@@ -137,7 +137,7 @@ export default function LandingHome() {
                                     About
                                 </Link>
                                 <Link href="/auth/register" onClick={() => setOpen(false)}>
-                                    <Button className="text-sm px-4 py-2">Start for free</Button>
+                                    <Button variant="secondary" className="text-sm px-4 py-2">Start for free</Button>
                                 </Link>
                             </nav>
                         </div>
@@ -162,10 +162,11 @@ export default function LandingHome() {
                         </p>
                         <Link href="/auth/register">
                             <button
-                                className="flex mx-auto md:mx-0 items-center gap-2 bg-sky-400 hover:bg-sky-800 text-white font-semibold px-5 py-3 rounded-lg transition-all duration-200">
+                                className="flex mx-auto md:mx-0 items-center gap-2 backdrop-blur-md bg-slate-900/40 hover:bg-slate-900/60 text-white font-semibold px-5 py-3 rounded-lg transition-all duration-200">
                                 Get For Free
                                 <ArrowBigRight className="w-5 h-5"/>
                             </button>
+
                         </Link>
                     </motion.div>
 
@@ -176,8 +177,14 @@ export default function LandingHome() {
                         transition={{duration: 0.6, delay: 0.2}}
                         className="hidden md:block"
                     >
-                        <Image src="/student.svg" alt="gambar" width={500} height={500}
-                               className="mx-auto w-[80%] md:w-[500px]"/>
+                        <Image
+                            priority
+                            src="./student.svg"
+                            alt="gambar"
+                            width={500}
+                            height={500}
+                            className="object-contain"
+                        />
                     </motion.div>
                 </section>
 
@@ -214,7 +221,7 @@ export default function LandingHome() {
                 </section>
 
                 {/* ABOUT SECTION */}
-                <section className="pt-8 pb-20 bg-sky-200 text-black">
+                <section className="pt-8 pb-20 bg-sky-200 text-black" id="about">
                     <motion.header
                         initial={{opacity: 0, y: 50}}
                         whileInView={{opacity: 1, y: 0}}
@@ -260,7 +267,7 @@ export default function LandingHome() {
 
             {/* FOOTER */}
             <footer
-                className="bg-white/10 backdrop-blur-md border-t border-white/20 text-gray-200 px-6 py-10 text-center sm:text-left">
+                className=" bg-gradient-to-tl from-slate-950 to-slate-800 backdrop-blur-md border-t border-slate/20 text-gray-200 px-6 py-10 text-center sm:text-left">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                     <div>
                         <h3 className="text-xl font-bold text-white">Mahasiswa Center</h3>
