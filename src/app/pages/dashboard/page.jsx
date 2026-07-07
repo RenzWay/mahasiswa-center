@@ -1,70 +1,86 @@
 "use client";
-import {motion} from "framer-motion";
-import {BookIcon, CalendarDays, NotebookPen} from "lucide-react";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Checkbox} from "@/components/ui/checkbox";
+
+import {useEffect, useMemo, useState} from "react";
 import Link from "next/link";
-import {useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
 import {onAuthStateChanged} from "firebase/auth";
+import {motion} from "framer-motion";
+import {
+    ArrowRight,
+    CalendarDays,
+    CheckCircle2,
+    CheckSquare,
+    Clock3,
+    LayoutDashboard,
+    NotebookPen,
+    Plus,
+    Sparkles,
+} from "lucide-react";
 import {auth} from "@/firebase/firebase";
 import ModelFirestore from "@/model/model";
-import {CardNoteMini, CardQuickDashboard, CardScheduleMini} from "@/app/lib/card";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Checkbox} from "@/components/ui/checkbox";
 import {formatDate} from "@/app/lib/formatdate";
-import {useRouter} from "next/navigation";
 import {LoadingDashboard} from "@/app/lib/loading";
-import Image from "next/image";
 
 const Model = new ModelFirestore();
 
+const cardMotion = {
+    initial: {opacity: 0, y: 16},
+    animate: {opacity: 1, y: 0},
+};
+
+function EmptyState({label}) {
+    return (
+        <div className="flex min-h-28 items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-400">
+            {label}
+        </div>
+    );
+}
+
+function SectionCard({title, description, href, action, children}) {
+    return (
+        <Card className="rounded-lg border-slate-200 bg-white py-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 sm:py-6">
+            <CardHeader className="flex flex-col items-start justify-between gap-3 px-4 pb-2 sm:flex-row sm:gap-4 sm:px-6 sm:pb-3">
+                <div className="min-w-0">
+                    <CardTitle className="text-base font-bold text-slate-950 dark:text-slate-50">
+                        {title}
+                    </CardTitle>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
+                </div>
+                <Button asChild size="sm" variant="outline" className="w-full shrink-0 sm:w-auto">
+                    <Link href={href}>
+                        {action}
+                        <ArrowRight className="size-3.5"/>
+                    </Link>
+                </Button>
+            </CardHeader>
+            <CardContent className="space-y-3 px-4 sm:px-6">{children}</CardContent>
+        </Card>
+    );
+}
+
 export default function DashboardPage() {
-    // === State Management ===
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
-
     const [tasks, setTasks] = useState([]);
     const [notes, setNotes] = useState([]);
     const [schedule, setSchedule] = useState([]);
-
-    // === State Length Dashboard ===
-    // === Derived Data ===
-    const [taskLength, setTaskLength] = useState([]);
-    const [notesLength, setNotesLength] = useState([])
-    const [scheduleLength, setScheduleLength] = useState([])
-
-    // === State DateTime ===
     const [dateTime, setDateTime] = useState(new Date());
 
-    // === Router Syntax ===
-    const router = useRouter();
-
-    // === DateTime ===
     useEffect(() => {
         const interval = setInterval(() => setDateTime(new Date()), 1000);
         return () => clearInterval(interval);
     }, []);
 
-    const formatted = dateTime.toLocaleString("en-EN", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-
-    const formattedTime = dateTime.toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-    });
-
-    // === Auth Listener & Data Fetch ===
     useEffect(() => {
-        Model.loginFirst((path) => router.push(path));
         const unsub = onAuthStateChanged(auth, async (currentUser) => {
             if (!currentUser) {
                 setUser(null);
                 setLoading(false);
+                router.push("/auth/login");
                 return;
             }
 
@@ -76,13 +92,9 @@ export default function DashboardPage() {
                     Model.getAllSchedule(),
                 ]);
 
-                setTaskLength(tasksRes.length);
-                setNotesLength(notesRes.length);
-                setScheduleLength(scheduleRes.length);
-
-                setTasks(tasksRes.slice(0, 3));
-                setNotes(notesRes.slice(0, 3));
-                setSchedule(scheduleRes.slice(0, 3));
+                setTasks(tasksRes);
+                setNotes(notesRes);
+                setSchedule(scheduleRes);
             } catch (err) {
                 console.error("Error fetching dashboard data:", err);
             } finally {
@@ -91,202 +103,260 @@ export default function DashboardPage() {
         });
 
         return () => unsub();
-    }, []);
+    }, [router]);
 
-    // === Loading / No Login ===
-    if (loading) {
-        return (
-            <div className="h-screen">
-                <LoadingDashboard/>
-            </div>
-        )
-    }
-    if (!user) return <p className="text-center py-10">Please login to access your dashboard.</p>;
+    const formattedDate = dateTime.toLocaleString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
 
-    // === Dashboard Card Data ===
-    const dashboardMiniTv = [
+    const formattedTime = dateTime.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
+
+    const activeTasks = useMemo(() => tasks.filter((task) => !task.complete), [tasks]);
+    const completedTasks = useMemo(() => tasks.filter((task) => task.complete), [tasks]);
+    const completionRate = tasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
+
+    const todaySchedule = useMemo(() => {
+        const today = new Date().toDateString();
+        return schedule.filter((item) => new Date(item.date).toDateString() === today);
+    }, [schedule]);
+
+    const metricCards = [
         {
-            name: "Pending Task",
-            icon: BookIcon,
-            handle: taskLength,
-            color: "text-blue-600 border-b-blue-400",
+            label: "Active Tasks",
+            value: activeTasks.length,
+            helper: `${completedTasks.length} completed`,
+            icon: CheckSquare,
+            color: "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/70 dark:bg-sky-950/40 dark:text-sky-300",
         },
         {
-            name: "Event Today",
+            label: "Today Schedule",
+            value: todaySchedule.length,
+            helper: `${schedule.length} total agenda`,
             icon: CalendarDays,
-            handle: scheduleLength,
-            color: "text-green-600 border-b-green-400 ",
+            color: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300",
         },
         {
-            name: "Total Notes",
+            label: "Notes",
+            value: notes.length,
+            helper: "study archive",
             icon: NotebookPen,
-            handle: notesLength,
-            color: "text-purple-600 border-b-purple-400",
+            color: "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900/70 dark:bg-violet-950/40 dark:text-violet-300",
         },
     ];
 
+    if (loading) {
+        return <LoadingDashboard/>;
+    }
 
-    const quickDashboard = [
-        {
-            title: "Upcoming Task",
-            description: `You have ${taskLength} task due soon`,
-            content: (
-                <>
-                    {tasks.length > 0 ? (
-                        tasks.map((task, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center gap-3 p-3 mb-4 rounded-lg border border-border hover:bg-accent dark:hover:text-slate-200 hover:text-black transition-colors"
-                            >
-                                <Checkbox checked={task.complete} className="h-4 w-4"/>
-                                <div className="flex-1">
-                                    <p
-                                        className={`text-sm font-medium ${
-                                            task.complete ? "line-through text-muted-foreground" : ""
-                                        }`}
-                                    >
-                                        {task.title}
+    if (!user) {
+        return (
+            <main className="flex min-h-[70vh] items-center justify-center text-slate-600 dark:text-slate-300">
+                Redirecting to login...
+            </main>
+        );
+    }
+
+    return (
+        <motion.main
+            initial={{opacity: 0, y: 12}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.35, ease: "easeOut"}}
+            className="min-h-screen overflow-x-hidden bg-slate-50 px-2 py-3 text-slate-950 dark:bg-slate-950 dark:text-slate-50 sm:px-6 sm:py-5 lg:px-8"
+        >
+            <section className="mx-auto w-full max-w-7xl min-w-0 space-y-4 sm:space-y-6">
+                <header className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div className="grid gap-4 p-3 sm:p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
+                        <div className="min-w-0">
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-md border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 dark:border-sky-900 dark:bg-sky-950/60 dark:text-sky-300 sm:text-sm">
+                                <LayoutDashboard className="size-4"/>
+                                Dashboard
+                            </div>
+                            <h1 className="break-words text-xl font-bold tracking-tight sm:text-3xl">
+                                Selamat datang, {user.displayName || user.email}
+                            </h1>
+                            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+                                Lihat tugas yang aktif, agenda hari ini, dan catatan terbaru tanpa pindah halaman dulu.
+                            </p>
+                        </div>
+
+                        <div className="flex min-w-0 flex-col justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950 sm:p-4 md:w-72">
+                            <div className="flex items-center gap-3">
+                                <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-slate-950 text-white dark:bg-white dark:text-slate-950">
+                                    <Clock3 className="size-5"/>
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="break-words text-sm font-medium text-slate-500 dark:text-slate-400">{formattedDate}</p>
+                                    <p className="text-2xl font-bold tabular-nums">{formattedTime}</p>
+                                </div>
+                            </div>
+                            <Button asChild className="h-9">
+                                <Link href="/task">
+                                    <Plus className="size-4"/>
+                                    Add Task
+                                </Link>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+
+                <section className="hidden gap-4 md:grid md:grid-cols-3">
+                    {metricCards.map((card, index) => (
+                        <motion.div
+                            key={card.label}
+                            variants={cardMotion}
+                            initial="initial"
+                            animate="animate"
+                            transition={{duration: 0.35, delay: index * 0.06}}
+                        >
+                            <Card className="rounded-lg border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                <CardContent className="flex items-center justify-between gap-4 p-4 sm:p-5">
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
+                                        <p className="mt-2 text-4xl font-bold tracking-tight">{card.value}</p>
+                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{card.helper}</p>
+                                    </div>
+                                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-md border ${card.color}`}>
+                                        <card.icon className="size-6"/>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </section>
+
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+                    <Card className="rounded-lg border-slate-200 bg-white py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:py-6">
+                        <CardHeader className="px-4 sm:px-6">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <CardTitle className="text-base font-bold">Today Focus</CardTitle>
+                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        Progress kecil yang penting buat hari ini.
                                     </p>
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                        <CalendarDays size={12}/>
-                                        {formatDate(task.date)}
+                                </div>
+                                <Sparkles className="size-5 text-amber-500 dark:text-amber-300"/>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="px-4 sm:px-6">
+                            <div className="mb-4 sm:mb-5">
+                                <div className="mb-2 flex items-center justify-between text-sm">
+                                    <span className="font-medium text-slate-600 dark:text-slate-300">Task completion</span>
+                                    <span className="font-bold">{completionRate}%</span>
+                                </div>
+                                <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <div
+                                        className="h-full rounded-full bg-sky-600 transition-all dark:bg-sky-400"
+                                        style={{width: `${completionRate}%`}}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950 sm:p-4">
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Next task</p>
+                                    <p className="mt-2 line-clamp-2 font-semibold">
+                                        {activeTasks[0]?.title || "No active task"}
+                                    </p>
+                                </div>
+                                <div className="rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950 sm:p-4">
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Next agenda</p>
+                                    <p className="mt-2 line-clamp-2 font-semibold">
+                                        {todaySchedule[0]?.title || "No agenda today"}
                                     </p>
                                 </div>
                             </div>
-                        ))
-                    ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">No task now</p>
-                    )}
-                    <div className="pt-4">
-                        <Link href="/task" className="w-full">
-                            <Button
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-3d hover:shadow-3d-pressed transition-all duration-300">
-                                See Your Task →
-                            </Button>
-                        </Link>
-                    </div>
-                </>
-            ),
-        },
-        {
-            title: "Schedule Today",
-            description: "Your agenda today",
-            content: (
-                <>
-                    {schedule.length > 0 ? (
-                        schedule.map((item, index) => <CardScheduleMini key={index} schedule={item}/>)
-                    ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">No schedule today</p>
-                    )}
-                    <div className="pt-4">
-                        <Link href="/schedule" className="w-full">
-                            <Button
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-3d hover:shadow-3d-pressed transition-all duration-300">
-                                See Your Schedule →
-                            </Button>
-                        </Link>
-                    </div>
-                </>
-            ),
-        },
-        {
-            title: "Recent Notes",
-            description: "Your most recent notes",
-            content: (
-                <>
-                    {notes.length > 0 ? (
-                        notes.map((item, i) => <CardNoteMini key={i} notes={item}/>)
-                    ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">No notes yet</p>
-                    )}
-                    <div className="pt-4">
-                        <Link href="/note" className="w-full">
-                            <Button
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-3d hover:shadow-3d-pressed transition-all duration-300">
-                                See Your Notes →
-                            </Button>
-                        </Link>
-                    </div>
-                </>
-            ),
-        },
-    ];
-
-    // === Main Render ===
-    return (
-        <motion.section
-            initial={{opacity: 0, x: -100}}
-            animate={{opacity: 1, x: 0}}
-            exit={{opacity: 0, y: 100}}
-            transition={{duration: 0.6, ease: "easeInOut"}}
-            className="mx-4 mt-4"
-        >
-            {/* === Header === */}
-            <header
-                className="mb-6 p-6 rounded-2xl shadow-3d bg-gradient-to-br from-blue-50 via-indigo-100 to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 border border-indigo-200 dark:border-white/10 text-slate-800 dark:text-white transition-all duration-500"
-            >
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent dark:from-slate-200 dark:to-white">
-                            Dashboard
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
-                            Welcome back, {user.displayName || user.email}
-                        </p>
-                    </div>
-
-                    <div className="ml-auto flex flex-col items-end text-right gap-2">
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                            {formatted}
-                        </p>
-                        <div
-                            className="flex items-center gap-3 bg-white/50 dark:bg-white/5 px-4 py-2 rounded-xl shadow-3d-pressed backdrop-blur-sm">
-                            <Image src={`/clock.png`} alt="clock icon" width={30} height={30}/>
-                            <span
-                                className="text-xl font-bold tracking-widest text-slate-800 dark:text-slate-100">{formattedTime}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-
-            {/* === Top Summary Cards === */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dashboardMiniTv.map((row, i) => (
-                    <Card
-                        key={i}
-                        className={`shadow-3d hover:shadow-3d-pressed hover:-translate-y-1 transition-all duration-300 border-b-4 ${row.color} bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900/90 dark:to-gray-800/90 border border-indigo-200 dark:border-white/10`}
-                    >
-
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className={`text-sm font-medium ${row.color.split(" ")[0]}`}>
-                                {row.name}
-                            </CardTitle>
-                            <row.icon className={`h-6 w-6 ${row.color.split(" ")[0]}`}/>
-                        </CardHeader>
-                        <CardContent>
-                            <div className={`text-4xl font-bold ${row.color.split(" ")[0]}`}>
-                                {row.handle}
-                            </div>
-                            <p className="text-xs text-slate-400 mt-2">Total items</p>
                         </CardContent>
                     </Card>
-                ))}
-            </section>
 
-            {/* === Quick Dashboard Cards === */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 my-8">
-                {quickDashboard.map((item, index) => (
-                    <CardQuickDashboard
-                        key={index}
-                        title={item.title}
-                        description={item.description}
-                        content={item.content}
-                        // className={`shadow-3d hover:shadow-3d-pressed transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-100  dark:from-sky-200 dark:to-blue-100  text-slate-800 dark:text-slate-800 border border-indigo-200 dark:border-blue-300 ${className}`}
-                    />
-                ))}
+                    <SectionCard
+                        title="Upcoming Tasks"
+                        description={`${activeTasks.length} task masih aktif`}
+                        href="/task"
+                        action="Open"
+                    >
+                        {tasks.slice(0, 4).length > 0 ? (
+                            tasks.slice(0, 4).map((task) => (
+                                <div
+                                    key={task.id}
+                                    className="flex items-start gap-3 rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900 sm:items-center"
+                                >
+                                    <Checkbox checked={task.complete} className="mt-0.5 size-5 shrink-0 sm:mt-0"/>
+                                    <div className="min-w-0 flex-1">
+                                        <p className={`truncate text-sm font-semibold ${task.complete ? "text-slate-400 line-through" : "text-slate-800 dark:text-slate-100"}`}>
+                                            {task.title}
+                                        </p>
+                                        <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                            <CalendarDays className="size-3"/>
+                                            {formatDate(task.date)}
+                                        </p>
+                                    </div>
+                                    {task.complete && <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-500 sm:mt-0"/>}
+                                </div>
+                            ))
+                        ) : (
+                            <EmptyState label="No task yet"/>
+                        )}
+                    </SectionCard>
+                </section>
+
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+                    <SectionCard
+                        title="Schedule Today"
+                        description="Agenda yang perlu kamu lihat sekarang"
+                        href="/schedule"
+                        action="Schedule"
+                    >
+                        {todaySchedule.slice(0, 3).length > 0 ? (
+                            todaySchedule.slice(0, 3).map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="rounded-md border border-emerald-100 bg-emerald-50 p-3 dark:border-emerald-900/70 dark:bg-emerald-950/30 sm:p-4"
+                                >
+                                    <p className="font-semibold text-emerald-950 dark:text-emerald-100">{item.title}</p>
+                                    <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
+                                        {formatDate(item.date)}
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <EmptyState label="No schedule today"/>
+                        )}
+                    </SectionCard>
+
+                    <SectionCard
+                        title="Recent Notes"
+                        description="Catatan terakhir yang kamu buat"
+                        href="/note"
+                        action="Notes"
+                    >
+                        {notes.slice(0, 3).length > 0 ? (
+                            notes.slice(0, 3).map((note) => (
+                                <article
+                                    key={note.id}
+                                    className="rounded-md border border-violet-100 bg-violet-50 p-3 dark:border-violet-900/70 dark:bg-violet-950/30 sm:p-4"
+                                >
+                                    <p className="font-semibold text-violet-950 dark:text-violet-100">
+                                        {note.title || "Untitled Note"}
+                                    </p>
+                                    <div
+                                        className="mt-2 line-clamp-2 text-sm text-violet-700 dark:text-violet-300"
+                                        dangerouslySetInnerHTML={{__html: note.content || ""}}
+                                    />
+                                </article>
+                            ))
+                        ) : (
+                            <EmptyState label="No notes yet"/>
+                        )}
+                    </SectionCard>
+                </section>
             </section>
-        </motion.section>
+        </motion.main>
     );
 }

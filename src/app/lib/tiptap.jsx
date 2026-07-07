@@ -147,7 +147,7 @@ export function TiptapEditor({
                                 editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : ''
                             }`}
                         >
-                            "
+                            &quot;
                         </button>
                         <button
                             onClick={() => editor.chain().focus().toggleCodeBlock().run()}

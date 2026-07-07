@@ -27,41 +27,40 @@ export function DropdownFooterSidebar({theme, setTheme, toggleTheme, user}) {
     };
 
     return (
-        <SidebarMenuItem>
+        <SidebarMenuItem className="px-3 pb-3">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="ghost"
-                        className="w-full flex items-center justify-between hover:bg-accent rounded-md transition"
+                        className="h-auto w-full justify-between rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition-colors hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
                     >
-                        <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
+                        <div className="flex min-w-0 items-center gap-3">
+                            <Avatar className="size-9 shrink-0 border border-slate-200 dark:border-slate-700">
                                 <AvatarImage
                                     src={user?.photoURL || "/default-avatar.png"}
                                     alt={user?.displayName || "User Avatar"}
                                 />
-                                <AvatarFallback>
+                                <AvatarFallback className="bg-slate-950 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
                                     {user?.displayName
                                         ? user.displayName[0].toUpperCase()
                                         : "?"}
                                 </AvatarFallback>
                             </Avatar>
-                            <div className="text-left">
-                                <span className="text-sm font-medium leading-tight">
+                            <div className="min-w-0 text-left">
+                                <span className="block truncate text-sm font-semibold leading-tight text-slate-900 dark:text-slate-50">
                                     {user?.displayName || "User"}
                                 </span>
-                                <p title={user?.email} className="text-xs text-muted-foreground truncate max-w-[130px]">
-                                    {user?.email}
+                                <p title={user?.email} className="max-w-[140px] truncate text-xs text-slate-500 dark:text-slate-400">
+                                    {user?.email || "No email"}
                                 </p>
                             </div>
                         </div>
 
-                        {/* ikon titik tiga di kanan */}
-                        <EllipsisVertical className="h-4 w-4 opacity-60 group-hover:opacity-100 transition"/>
+                        <EllipsisVertical className="size-4 shrink-0 text-slate-400 transition group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-200"/>
                     </Button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent className="w-56" align="start" side="top">
+                <DropdownMenuContent className="w-60 rounded-lg border-slate-200 dark:border-slate-800" align="start" side="top">
                     <DropdownMenuLabel>Account Settings</DropdownMenuLabel>
                     <DropdownMenuSeparator/>
                     <DropdownMenuItem onClick={toggleTheme}>

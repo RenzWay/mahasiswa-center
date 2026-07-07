@@ -1,260 +1,379 @@
-"use client"
-import {motion} from "framer-motion";
-import {Button} from "@/components/ui/button";
-import {useCallback, useEffect, useState} from "react";
-import {TiptapEditor} from "@/app/lib/tiptap";
-import {ArrowLeft} from "lucide-react";
-import {Input} from "@/components/ui/input";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  FileText,
+  Folder,
+  NotebookPen,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { auth } from "@/firebase/firebase";
 import ModelFirestore from "@/model/model";
-import {CardNoteList} from "@/app/lib/card";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import { TiptapEditor } from "@/app/lib/tiptap";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatDate } from "@/app/lib/formatdate";
 
 const Notes = new ModelFirestore();
 
+const categories = ["None", "Study", "Ideas", "Work", "Personal"];
+
 function debounce(fn, delay) {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => fn(...args), delay);
-    };
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
+function stripHtml(value = "") {
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function EmptyNotes({ onCreate }) {
+  return (
+    <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-5 text-center dark:border-slate-800 dark:bg-slate-950">
+      <NotebookPen className="mb-4 size-10 text-slate-400 dark:text-slate-500" />
+      <p className="text-base font-semibold text-slate-800 dark:text-slate-100">
+        No notes yet
+      </p>
+      <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+        Create your first note for lecture summaries, ideas, or quick study
+        reminders.
+      </p>
+      <Button onClick={onCreate} className="mt-5">
+        <Plus className="size-4" />
+        New Note
+      </Button>
+    </div>
+  );
 }
 
 export default function NotePage() {
-    const [notes, setNotes] = useState([])
-    const [selectedNotes, setSelectedNotes] = useState(null)
+  const router = useRouter();
+  const [notes, setNotes] = useState([]);
+  const [selectedNotes, setSelectedNotes] = useState(null);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const getNote = async () => {
-            try {
-                const data = await Notes.getAllNotes()
-                setNotes(data)
-            } catch (error) {
-                console.error(error)
-            }
-        }
-        getNote()
-    }, []);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        setLoading(false);
+        router.push("/auth/login");
+        return;
+      }
 
-    const handleTitleChange = useCallback(debounce(async (id, newTitle) => {
+      try {
+        const data = await Notes.getAllNotes();
+        setNotes(data);
+        setSelectedNotes(data[0] || null);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleTitleChange = useMemo(
+    () =>
+      debounce(async (id, newTitle) => {
         if (!id) return;
-        await Notes.updateNote(id, {title: newTitle});
-    }, 600), []);
+        await Notes.updateNote(id, { title: newTitle });
+      }, 600),
+    [],
+  );
 
-    const handleContentChange = useCallback(debounce(async (id, html) => {
+  const handleContentChange = useMemo(
+    () =>
+      debounce(async (id, html) => {
         if (!id) return;
-        await Notes.updateNote(id, {content: html});
-    }, 800), []);
+        await Notes.updateNote(id, { content: html });
+      }, 800),
+    [],
+  );
 
+  const filteredNotes = useMemo(() => {
+    const keyword = search.toLowerCase().trim();
+    if (!keyword) return notes;
 
-    const handleAddNotes = async () => {
-        const newNotes = {
-            title: "Untitled Notes",
-            content: "Write here...",
-            date: new Date(),
-            category: "None"
-        }
-        const fireNotes = await Notes.addNote(newNotes);
-        setNotes((prev) => [...prev, fireNotes])
-        setSelectedNotes(fireNotes)
-    }
+    return notes.filter((note) => {
+      const title = note.title?.toLowerCase() || "";
+      const content = stripHtml(note.content).toLowerCase();
+      const category = note.category?.toLowerCase() || "";
+      return (
+        title.includes(keyword) ||
+        content.includes(keyword) ||
+        category.includes(keyword)
+      );
+    });
+  }, [notes, search]);
 
-    const handleDeleteNote = async (id) => {
-        try {
-            await Notes.deleteNote(id);
-            setNotes(prev => prev.filter(n => n.id !== id));
-            if (selectedNotes?.id === id) setSelectedNotes(null);
-        } catch (err) {
-            console.error("Gagal menghapus note:", err);
-        }
+  const updateSelectedNote = (patch) => {
+    if (!selectedNotes) return;
+    const updatedNote = { ...selectedNotes, ...patch };
+    setSelectedNotes(updatedNote);
+    setNotes((prev) =>
+      prev.map((note) => (note.id === updatedNote.id ? updatedNote : note)),
+    );
+  };
+
+  const handleAddNotes = async () => {
+    const newNotes = {
+      title: "Untitled Note",
+      content: "<p>Write here...</p>",
+      date: new Date().toISOString(),
+      category: "None",
     };
 
+    const fireNotes = await Notes.addNote(newNotes);
+    setNotes((prev) => [fireNotes, ...prev]);
+    setSelectedNotes(fireNotes);
+  };
 
+  const handleDeleteNote = async (id) => {
+    try {
+      await Notes.deleteNote(id);
+      setNotes((prev) => {
+        const nextNotes = prev.filter((note) => note.id !== id);
+        if (selectedNotes?.id === id) {
+          setSelectedNotes(nextNotes[0] || null);
+        }
+        return nextNotes;
+      });
+    } catch (err) {
+      console.error("Gagal menghapus note:", err);
+    }
+  };
+
+  const handleCategoryChange = async (newCategory) => {
+    if (!selectedNotes) return;
+    updateSelectedNote({ category: newCategory });
+    await Notes.updateNote(selectedNotes.id, { category: newCategory });
+  };
+
+  if (loading) {
     return (
-        <motion.section
-            initial={{y: -100, opacity: 0}}
-            animate={{y: 0, opacity: 1}}
-            exit={{y: -100, opacity: 0}}
-            transition={{
-                type: "spring",
-                stiffness: 100,
-                damping: 15,
-                duration: 0.6
-            }}
-            className="h-screen flex flex-col">
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-300">
+        Loading notes...
+      </main>
+    );
+  }
 
-            {/* Header - Desktop only */}
-            <header
-                className="
-    hidden md:flex items-center justify-between
-    mx-4 mt-2 mb-3 px-6 py-4
-    rounded-2xl border border-white/20
-    bg-gradient-to-r from-blue-100/70 via-indigo-100/70 to-purple-100/70
-    dark:from-slate-800/60 dark:via-slate-900/60 dark:to-gray-800/60
-    backdrop-blur-md shadow-md
-    transition-all duration-300
-  "
-            >
+  return (
+    <motion.main
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="min-h-screen bg-slate-50 px-3 py-4 text-slate-950 dark:bg-slate-950 dark:text-slate-50 sm:px-6 sm:py-5 lg:px-8">
+      <section className="mx-auto flex h-[calc(100vh-2rem)] max-w-7xl flex-col gap-5 sm:h-[calc(100vh-2.5rem)]">
+        <header
+          className={` ${selectedNotes ? "hidden lg:block" : "block"} rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5`}>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="min-w-0">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-md border border-violet-100 bg-violet-50 px-3 py-1 text-sm font-medium text-violet-700 dark:border-violet-900 dark:bg-violet-950/50 dark:text-violet-300">
+                <NotebookPen className="size-4" />
+                Notes
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                Capture what matters
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+                Keep lecture summaries, study ideas, and personal reminders in
+                one focused workspace.
+              </p>
+            </div>
+
+            <Button onClick={handleAddNotes} className="w-full md:w-auto">
+              <Plus className="size-4" />
+              New Note
+            </Button>
+          </div>
+        </header>
+
+        <section className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
+          <aside
+            className={`${selectedNotes ? "hidden lg:flex" : " block"} min-h-0 flex-col rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900`}>
+            <div className="border-b border-slate-200 p-4 dark:border-slate-800">
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-2xl font-bold bg-clip-text">
-                        📝 Note your day
-                    </h2>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                        Write. Organize. Remember everything.
-                    </p>
+                  <h2 className="font-bold text-slate-950 dark:text-slate-50">
+                    Library
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {notes.length} notes saved
+                  </p>
                 </div>
-
                 <Button
-                    onClick={handleAddNotes}
-                    className="  bg-gradient-to-r from-blue-500 to-indigo-500 text-white  hover:from-indigo-500 hover:to-blue-500  shadow-md hover:shadow-lg transition-all"
-                >
-                    + New Note
+                  onClick={handleAddNotes}
+                  size="icon"
+                  variant="outline"
+                  aria-label="Create note">
+                  <Plus className="size-4" />
                 </Button>
-            </header>
+              </div>
 
+              <div className="relative mt-4">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search notes..."
+                  className="h-10 pl-10"
+                />
+              </div>
+            </div>
 
-            {/* Mobile Header - Show in list view */}
-            {!selectedNotes && (
-                <header className="md:hidden flex mx-4 justify-between border-b py-4">
-                    <h2 className="text-xl font-semibold">Note your day (mobile)</h2>
-                    <Button onClick={handleAddNotes} size="sm">+ Note</Button>
-                </header>
-            )}
+            <div className="min-h-0 flex-1 overflow-y-auto p-3">
+              {filteredNotes.length > 0 ? (
+                <div className="space-y-2">
+                  {filteredNotes.map((note) => (
+                    <button
+                      key={note.id}
+                      type="button"
+                      onClick={() => setSelectedNotes(note)}
+                      className={`w-full rounded-lg border p-3 text-left transition-colors ${
+                        selectedNotes?.id === note.id
+                          ? "border-violet-200 bg-violet-50 dark:border-violet-900 dark:bg-violet-950/40"
+                          : "border-slate-200 bg-slate-50 hover:border-violet-200 hover:bg-violet-50/60 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-900 dark:hover:bg-violet-950/20"
+                      }`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                            {note.title || "Untitled Note"}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            {formatDate(note.date)}
+                          </p>
+                        </div>
+                        <span className="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+                          {note.category || "None"}
+                        </span>
+                      </div>
+                      <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                        {stripHtml(note.content) || "No content yet"}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <EmptyNotes onCreate={handleAddNotes} />
+              )}
+            </div>
+          </aside>
 
-            {/* Mobile Back Button - Show in editor view */}
-            {selectedNotes && (
-                <header className="md:hidden flex items-center gap-2 mx-4 border-b py-4">
+          <section
+            className={`${selectedNotes ? "flex" : "hidden lg:flex"} min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900`}>
+            {selectedNotes ? (
+              <>
+                <div className="border-b border-slate-200 p-3 dark:border-slate-800 sm:p-4">
+                  <div className="mb-3 flex items-center justify-between gap-3 lg:hidden">
                     <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedNotes(null)}
-                        className="flex items-center gap-1"
-                    >
-                        <ArrowLeft size={16}/>
-                        Back
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedNotes(null)}>
+                      <ArrowLeft className="size-4" />
+                      Notes
                     </Button>
-                    <Input onChange={(e) => {
-                        const newTitle = e.target.value;
-                        const updated = notes.map(n =>
-                            n.id === selectedNotes.id ? {...n, title: newTitle} : n
-                        );
-                        setNotes(updated);
-                        setSelectedNotes({...selectedNotes, title: newTitle});
-                        handleTitleChange(selectedNotes.id, newTitle);
-                    }}
-                           value={selectedNotes.title}/>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteNote(selectedNotes.id)}
+                      className="text-red-600 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200">
+                      <Trash2 className="size-4" />
+                      Delete
+                    </Button>
+                  </div>
 
-                    <Select
-                        value={selectedNotes.category || ""}
-                        onValueChange={async (newCategory) => {
-                            const updatedNote = {...selectedNotes, category: newCategory};
-                            setSelectedNotes(updatedNote);
-                            setNotes(notes.map(n => n.id === selectedNotes.id ? updatedNote : n));
-                            await Notes.updateNote(selectedNotes.id, {category: newCategory});
-                        }}
-                    >
-                        <SelectTrigger className="w-[130px] text-sm">
-                            <SelectValue placeholder="No category"/>
+                  <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+                    <Input
+                      type="text"
+                      value={selectedNotes.title || ""}
+                      onChange={(e) => {
+                        const newTitle = e.target.value;
+                        updateSelectedNote({ title: newTitle });
+                        handleTitleChange(selectedNotes.id, newTitle);
+                      }}
+                      className="h-11 border-transparent bg-slate-50 text-lg font-bold shadow-none focus-visible:border-violet-300 dark:bg-slate-950 dark:focus-visible:border-violet-800 sm:text-xl"
+                      placeholder="Note title..."
+                    />
+
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center">
+                      <Select
+                        value={selectedNotes.category || "None"}
+                        onValueChange={handleCategoryChange}>
+                        <SelectTrigger className="h-11 w-full sm:w-40">
+                          <Folder className="size-4 text-slate-400" />
+                          <SelectValue placeholder="Category" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="None">No category</SelectItem>
-                            <SelectItem value="Work">Work</SelectItem>
-                            <SelectItem value="Personal">Personal</SelectItem>
-                            <SelectItem value="Study">Study</SelectItem>
-                            <SelectItem value="Ideas">Ideas</SelectItem>
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
-                    </Select>
-                </header>
+                      </Select>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDeleteNote(selectedNotes.id)}
+                        className="hidden text-red-600 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200 lg:inline-flex">
+                        <Trash2 className="size-4" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+
+                  <p className="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <FileText className="size-3.5" />
+                    Last opened from {formatDate(selectedNotes.date)}
+                  </p>
+                </div>
+
+                <Card className="min-h-0 flex-1 rounded-none border-0 bg-white py-0 shadow-none dark:bg-slate-900">
+                  <CardContent className="h-full p-0">
+                    <TiptapEditor
+                      key={selectedNotes.id}
+                      content={selectedNotes.content}
+                      onChange={(html) => {
+                        updateSelectedNote({ content: html });
+                        handleContentChange(selectedNotes.id, html);
+                      }}
+                      minHeight="100%"
+                      className="h-full"
+                    />
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <div className="flex h-full items-center justify-center p-6">
+                <EmptyNotes onCreate={handleAddNotes} />
+              </div>
             )}
-
-            <section className="flex gap-2 flex-2 overflow-hidden">
-                {/* Sidebar - Hide on mobile when note selected */}
-                <section
-                    className={`${selectedNotes ? 'hidden md:flex md:flex-col' : 'grid md:flex md:flex-col'} gap-2 md:gap-0 flex-1 md:border-r border-gray-200 overflow-y-auto p-4`}>
-                    {notes.map((note, i) => (
-                        <CardNoteList
-                            key={i}
-                            note={note}
-                            onSelect={setSelectedNotes}
-                            isSelected={selectedNotes?.id === note.id}
-                            handleDelete={handleDeleteNote}
-                        />
-
-                    ))}
-                </section>
-
-                {/* Editor - Show on mobile when note selected, always show on desktop */}
-                <section className={`
-                    ${selectedNotes ? 'flex' : 'hidden md:flex'}
-                    flex-[2] flex-col overflow-hidden
-                `}>
-                    {selectedNotes ? (
-                        <div className="flex flex-col h-full">
-                            {/* Title Input - Desktop only (mobile ada di header) */}
-                            <div className="hidden md:flex items-center gap-3 p-4 border-b">
-                                <input
-                                    type="text"
-                                    value={selectedNotes.title}
-                                    onChange={(e) => {
-                                        const newTitle = e.target.value;
-                                        const updated = notes.map(n =>
-                                            n.id === selectedNotes.id ? {...n, title: newTitle} : n
-                                        );
-                                        setNotes(updated);
-                                        setSelectedNotes({...selectedNotes, title: newTitle});
-                                        handleTitleChange(selectedNotes.id, newTitle);
-                                    }}
-                                    className="flex-1 text-2xl font-bold border-none outline-none bg-transparent"
-                                    placeholder="Note title..."
-                                />
-
-                                <Select
-                                    value={selectedNotes.category || ""}
-                                    onValueChange={async (newCategory) => {
-                                        const updatedNote = {...selectedNotes, category: newCategory};
-                                        setSelectedNotes(updatedNote);
-                                        setNotes(notes.map(n => n.id === selectedNotes.id ? updatedNote : n));
-                                        await Notes.updateNote(selectedNotes.id, {category: newCategory});
-                                    }}
-                                >
-                                    <SelectTrigger className="w-[130px] text-sm">
-                                        <SelectValue placeholder="No category"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="None">No category</SelectItem>
-                                        <SelectItem value="Work">Work</SelectItem>
-                                        <SelectItem value="Personal">Personal</SelectItem>
-                                        <SelectItem value="Study">Study</SelectItem>
-                                        <SelectItem value="Ideas">Ideas</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                            </div>
-
-                            {/* Editor */}
-                            <div className="flex-1 overflow-hidden">
-                                <TiptapEditor
-                                    key={selectedNotes.id}
-                                    content={selectedNotes.content}
-                                    onChange={(html) => {
-                                        const updatedNotes = notes.map(n =>
-                                            n.id === selectedNotes.id ? {...n, content: html} : n
-                                        );
-                                        setNotes(updatedNotes);
-                                        setSelectedNotes({...selectedNotes, content: html});
-                                        handleContentChange(selectedNotes.id, html);
-                                    }}
-                                    minHeight="100%"
-                                    className="h-full"
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                            <p>Please choose your note first to see</p>
-                        </div>
-                    )}
-                </section>
-            </section>
-        </motion.section>
-    )
+          </section>
+        </section>
+      </section>
+    </motion.main>
+  );
 }

@@ -1,298 +1,298 @@
 "use client";
-import {useEffect, useState} from "react";
-import {useRouter} from "next/navigation";
-import {onAuthStateChanged} from "firebase/auth";
-import {auth} from "@/firebase/firebase";
-import {Button} from "@/components/ui/button";
-import {ArrowBigRight, Menu, X} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/firebase/firebase";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowRight,
+  CalendarDays,
+  CheckSquare,
+  LayoutDashboard,
+  Menu,
+  NotebookPen,
+  Sparkles,
+  X,
+} from "lucide-react";
 import Image from "next/image";
-import {motion} from "framer-motion"
+import { motion } from "framer-motion";
 import Link from "next/link";
 
-const cardService = [
-    {
-        title: "Collect Your Tasks",
-        description: "Easily manage and keep track of your college assignments with priority tags.",
-        color: "bg-red-300",
-        img: "/ss/task.png"
-    },
-    {
-        title: "Schedule Your Days",
-        description: "Plan your schedule for tomorrow and never miss a class or task again.",
-        color: "bg-sky-300",
-        img: "/ss/schedule.png"
-    },
-    {
-        title: "Personal Notes",
-        description: "Write and organize your own study notes effectively and efficiently.",
-        color: "bg-lime-300",
-        img: "/ss/note.png"
-    }
-]
+const features = [
+  {
+    title: "Collect Your Tasks",
+    icon: CheckSquare,
+    description:
+      "Easily manage and keep track of your college assignments with priority tags.",
+    color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+    img: "/ss/task.png",
+  },
+  {
+    title: "Schedule Your Days",
+    icon: CalendarDays,
+    description:
+      "Plan your schedule for tomorrow and never miss a class or task again.",
+    color: "text-sky-600 bg-sky-50 border-sky-100",
+    img: "/ss/schedule.png",
+  },
+  {
+    title: "Personal Notes",
+    icon: NotebookPen,
+    description:
+      "Write and organize your own study notes effectively and efficiently.",
+    color: "text-violet-600 bg-violet-50 border-violet-100",
+    img: "/ss/note.png",
+  },
+];
+
+const stats = [
+  { label: "Workspace", value: "3" },
+  { label: "Simple tools", value: "1" },
+  { label: "Daily focus", value: "24h" },
+];
 
 export default function LandingHome() {
-    const router = useRouter();
-    const [open, setOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setIsLoading(true);
-                setTimeout(() => {
-                    router.push("/pages/dashboard");
-                }, 800);
-            } else {
-                setIsLoading(false);
-            }
-        });
-        return () => unsub();
-    }, [router]);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoading(true);
+        setTimeout(() => {
+          router.push("/pages/dashboard");
+        }, 800);
+      } else {
+        setIsLoading(false);
+      }
+    });
+    return () => unsub();
+  }, [router]);
 
-    if (isLoading) {
-        return (
-            <main className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900">
-                <div className="flex flex-col items-center">
-                    <div
-                        className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4"/>
-                    <p className="text-gray-600 dark:text-gray-300 font-medium">
-                        Loading your services...
-                    </p>
-                </div>
-            </main>
-        );
-    }
-
+  if (isLoading) {
     return (
-        <>
-            <main className="h-auto bg-gradient-to-tl from-sky-900 to-sky-950 text-white scroll-smooth">
-                {/* NAVBAR */}
-                <header
-                    className="sticky top-0 z-50 bg-white/20 dark:bg-gray-800/30 backdrop-blur-sm border-b border-white/30 dark:border-gray-700/40">
-                    <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
-                        <h3 className="font-extrabold text-lg sm:text-xl">
-                            Mahasiswa Center
-                        </h3>
-
-                        {/* Tombol menu untuk mobile */}
-                        <button
-                            className="sm:hidden p-2 rounded-md focus:outline-none"
-                            onClick={() => setOpen(!open)}
-                            aria-label="Toggle menu"
-                        >
-                            {open ? <X size={22}/> : <Menu size={22}/>}
-                        </button>
-
-                        {/* Menu untuk layar besar */}
-                        <nav className="hidden sm:flex items-center gap-6">
-                            <ul className="flex gap-6 text-sm sm:text-base">
-                                <li>
-                                    <Link href="/" className="hover:text-blue-500 transition">
-                                        Home
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/contact" className="hover:text-blue-500 transition">
-                                        Contact
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="#about" className="hover:text-blue-500 transition">
-                                        About
-                                    </Link>
-                                </li>
-                            </ul>
-                            <Link href="/auth/register">
-                                <Button variant="secondary" className="text-sm sm:text-base px-4 py-2 sm:px-6">
-                                    Start for free
-                                </Button>
-                            </Link>
-                        </nav>
-                    </div>
-
-                    {/* Menu mobile */}
-                    {open && (
-                        <div
-                            className="sm:hidden border-t border-white/20 dark:border-gray-700/40 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md">
-                            <nav className="flex flex-col items-center gap-4 py-4">
-                                <Link
-                                    href="/"
-                                    className="hover:text-blue-500 transition"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    Home
-                                </Link>
-                                <Link
-                                    href="/contact"
-                                    className="hover:text-blue-500 transition"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    Contact
-                                </Link>
-                                <Link
-                                    href="/about"
-                                    className="hover:text-blue-500 transition"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    About
-                                </Link>
-                                <Link href="/auth/register" onClick={() => setOpen(false)}>
-                                    <Button variant="secondary" className="text-sm px-4 py-2">Start for free</Button>
-                                </Link>
-                            </nav>
-                        </div>
-                    )}
-                </header>
-
-                {/* HERO SECTION */}
-                <section
-                    className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-12 items-center text-center md:text-left">
-                    <motion.div
-                        initial={{opacity: 0, x: -50}}
-                        whileInView={{opacity: 1, x: 0}}
-                        viewport={{amount: 0.2}}
-                        transition={{duration: 0.6, delay: 0.2}}
-                    >
-                        <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
-                            Schedule Your Time <br/> And Note It
-                        </h1>
-                        <p className="text-gray-200 mb-6">
-                            Easily record, manage, and schedule your college assignments — all in one convenient place
-                            to support your day.
-                        </p>
-                        <Link href="/auth/register">
-                            <button
-                                className="flex mx-auto md:mx-0 items-center gap-2 backdrop-blur-md bg-slate-900/40 hover:bg-slate-900/60 text-white font-semibold px-5 py-3 rounded-lg transition-all duration-200">
-                                Get For Free
-                                <ArrowBigRight className="w-5 h-5"/>
-                            </button>
-
-                        </Link>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{opacity: 0, x: 50}}
-                        whileInView={{opacity: 1, x: 0}}
-                        viewport={{amount: 0.2}}
-                        transition={{duration: 0.6, delay: 0.2}}
-                        className="hidden md:block"
-                    >
-                        <Image
-                            priority
-                            src="./student.svg"
-                            alt="gambar"
-                            width={500}
-                            height={500}
-                            className="object-contain"
-                        />
-                    </motion.div>
-                </section>
-
-                {/* CARD SECTION */}
-                <section className="bg-white w-full text-black pb-10">
-                    <motion.header
-                        initial={{opacity: 0, y: 50}}
-                        whileInView={{opacity: 1, y: 0}}
-                        viewport={{amount: 0.2}}
-                        transition={{duration: 0.6, delay: 0.2}}
-                        className="flex flex-col items-center justify-center p-6 text-center"
-                    >
-                        <p className="text-blue-600 font-bold">What you'll get</p>
-                        <p className="text-2xl font-bold">Enjoy all the services included in Mahasiswa Center</p>
-                        <p className="text-gray-700">Everything you need to manage your academic life in one place</p>
-                    </motion.header>
-
-                    <section className="flex flex-wrap justify-center gap-6 px-4">
-                        {cardService.map((item, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{opacity: 0, y: 50}}
-                                whileInView={{opacity: 1, y: 0}}
-                                viewport={{amount: 0.2}}
-                                transition={{duration: 0.6, delay: index * 0.2}}
-                                className={`flex flex-col items-center p-6 sm:p-8 h-auto sm:h-[400px] ${item.color} rounded-md w-[90%] sm:w-[300px]`}
-                            >
-                                <Image className="mb-6 rounded" src={item.img} alt="gambar" width={250} height={250}/>
-                                <h3 className="text-center font-semibold text-lg mb-2">{item.title}</h3>
-                                <p className="text-center text-sm">{item.description}</p>
-                            </motion.div>
-                        ))}
-                    </section>
-                </section>
-
-                {/* ABOUT SECTION */}
-                <section className="pt-8 pb-20 bg-sky-200 text-black" id="about">
-                    <motion.header
-                        initial={{opacity: 0, y: 50}}
-                        whileInView={{opacity: 1, y: 0}}
-                        viewport={{amount: 0.2}}
-                        transition={{duration: 0.6, delay: 0.2}}
-                        className="flex flex-col items-center px-4"
-                    >
-                        <div className="bg-sky-400 p-6 sm:p-10 rounded-xl shadow-lg w-full sm:w-[600px] md:w-[800px]">
-                            <Image src="/Education.png" alt="claim photo" width={800} height={800}
-                                   className="mx-auto rounded-lg w-full"/>
-                        </div>
-                    </motion.header>
-
-                    <section className="p-6 sm:p-10 text-center sm:text-left">
-                        <motion.p
-                            initial={{opacity: 0, y: 50}}
-                            whileInView={{opacity: 1, y: 0}}
-                            transition={{duration: 0.6, delay: 0.2}}
-                            className="text-blue-600 font-bold text-md"
-                        >
-                            About us
-                        </motion.p>
-                        <motion.h1
-                            initial={{opacity: 0, y: 50}}
-                            whileInView={{opacity: 1, y: 0}}
-                            transition={{duration: 0.6, delay: 0.3}}
-                            className="text-2xl sm:text-4xl font-bold mt-2"
-                        >
-                            About Mahasiswa Center
-                        </motion.h1>
-                        <motion.p
-                            initial={{opacity: 0, y: 50}}
-                            whileInView={{opacity: 1, y: 0}}
-                            transition={{duration: 0.6, delay: 0.4}}
-                            className="max-w-[600px] mx-auto sm:mx-0 mt-4 text-gray-700"
-                        >
-                            Mahasiswa Center is a platform designed to help college students manage their daily academic
-                            activities easily...
-                        </motion.p>
-                    </section>
-                </section>
-            </main>
-
-            {/* FOOTER */}
-            <footer
-                className=" bg-gradient-to-tl from-slate-950 to-slate-800 backdrop-blur-md border-t border-slate/20 text-gray-200 px-6 py-10 text-center sm:text-left">
-                <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                    <div>
-                        <h3 className="text-xl font-bold text-white">Mahasiswa Center</h3>
-                        <p className="text-sm mt-2 text-gray-300">
-                            Manage your academic life easily — notes, schedules, and tasks in one place.
-                        </p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <h4 className="text-white font-semibold mb-2">Quick Links</h4>
-                        <a href="#" className="hover:text-sky-400 transition-colors">Home</a>
-                        <a href="#" className="hover:text-sky-400 transition-colors">About</a>
-                        <a href="#" className="hover:text-sky-400 transition-colors">Contact</a>
-                    </div>
-                    <div className="flex flex-col gap-3 items-center md:items-end">
-                        <div className="flex gap-4 justify-center md:justify-end">
-                            <a href="#" className="hover:text-sky-400 transition-colors">Twitter</a>
-                            <a href="#" className="hover:text-sky-400 transition-colors">Instagram</a>
-                            <a href="#" className="hover:text-sky-400 transition-colors">LinkedIn</a>
-                        </div>
-                        <p className="text-sm text-gray-400 mt-4">
-                            © {new Date().getFullYear()} Mahasiswa Center. All rights reserved.
-                        </p>
-                    </div>
-                </div>
-            </footer>
-        </>
+      <main className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mb-4" />
+          <p className="text-gray-600 dark:text-gray-300 font-medium">
+            Loading your services...
+          </p>
+        </div>
+      </main>
     );
+  }
+
+  return (
+    <>
+      <main className="min-h-screen bg-[#f7f8fb] text-slate-950">
+        <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 lg:px-8">
+            <Link href="/" className="flex items-center gap-3">
+              <span className="flex size-9 items-center justify-center rounded-md bg-slate-950 text-white">
+                <LayoutDashboard className="size-4" />
+              </span>
+              <span className="text-base font-bold">Mahasiswa Center</span>
+            </Link>
+
+            <nav className="hidden items-center gap-7 text-sm font-medium text-slate-600 md:flex">
+              <a href="#features" className="hover:text-slate-950">
+                Fitur
+              </a>
+              <a href="#preview" className="hover:text-slate-950">
+                Preview
+              </a>
+              <a href="#start" className="hover:text-slate-950">
+                Mulai
+              </a>
+            </nav>
+
+            <div className="hidden items-center gap-2 md:flex">
+              <Button asChild variant="ghost">
+                <Link href="/auth/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth/register">
+                  Mulai Gratis
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
+
+            <button
+              type="button"
+              className="inline-flex size-9 items-center justify-center rounded-md border border-slate-200 md:hidden"
+              aria-label="Toggle menu"
+              onClick={() => setOpen((value) => !value)}>
+              {open ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
+          </div>
+
+          {open && (
+            <div className="border-t border-slate-200 bg-white px-5 py-4 md:hidden">
+              <nav className="flex flex-col gap-4 text-sm font-medium text-slate-700">
+                <a href="#features" onClick={() => setOpen(false)}>
+                  Fitur
+                </a>
+                <a href="#preview" onClick={() => setOpen(false)}>
+                  Preview
+                </a>
+                <a href="#start" onClick={() => setOpen(false)}>
+                  Mulai
+                </a>
+                <Button asChild className="mt-2">
+                  <Link href="/auth/register">Mulai Gratis</Link>
+                </Button>
+              </nav>
+            </div>
+          )}
+        </header>
+
+        <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-16 pt-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:pb-20 lg:pt-16">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="max-w-2xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-medium text-sky-700">
+              <Sparkles className="size-4" />
+              Ruang kerja ringan buat mahasiswa
+            </div>
+            <h1 className="max-w-xl text-4xl font-bold leading-tight text-slate-950 sm:text-5xl lg:text-6xl">
+              Jadwal, tugas, dan catatan dalam satu tempat.
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+              Mahasiswa Center bantu kamu melihat apa yang harus dikerjakan hari
+              ini, apa yang sudah selesai, dan apa yang perlu dicatat sebelum
+              lupa.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/auth/register">
+                  Coba Sekarang
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/auth/login">Masuk ke Akun</Link>
+              </Button>
+            </div>
+
+            <dl className="mt-10 grid max-w-md grid-cols-3 gap-3">
+              {stats.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-md border border-slate-200 bg-white p-4">
+                  <dt className="text-xs font-medium text-slate-500">
+                    {item.label}
+                  </dt>
+                  <dd className="mt-1 text-2xl font-bold text-slate-950">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative"
+            id="preview">
+            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl shadow-slate-300/50">
+              <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+                <span className="size-2.5 rounded-full bg-rose-400" />
+                <span className="size-2.5 rounded-full bg-amber-400" />
+                <span className="size-2.5 rounded-full bg-emerald-400" />
+                <span className="ml-3 text-xs font-medium text-slate-500">
+                  Dashboard preview
+                </span>
+              </div>
+              <Image
+                src="/ss/dashboard.png"
+                alt="Preview dashboard Mahasiswa Center"
+                width={1200}
+                height={760}
+                priority
+                className="h-auto w-full"
+              />
+            </div>
+          </motion.div>
+        </section>
+
+        <section
+          id="features"
+          className="border-y border-slate-200 bg-white py-16">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8">
+            <div className="mb-8 max-w-2xl">
+              <p className="text-sm font-bold uppercase text-sky-600">
+                Fitur utama
+              </p>
+              <h2 className="mt-2 text-3xl font-bold text-slate-950">
+                Simple, tapi cukup buat dipakai harian.
+              </h2>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-3">
+              {features.map((feature, index) => (
+                <motion.article
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                  className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                  <div className="aspect-16/10 overflow-hidden border-b border-slate-200 bg-slate-100">
+                    <Image
+                      src={feature.img}
+                      alt={`Preview ${feature.title}`}
+                      width={720}
+                      height={450}
+                      className="h-full w-full object-cover object-top"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <div
+                      className={`mb-4 inline-flex size-10 items-center justify-center rounded-md border ${feature.color}`}>
+                      <feature.icon className="size-5" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-950">
+                      {feature.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {feature.description}
+                    </p>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="start"
+          className="bg-slate-950 px-5 py-16 text-white lg:px-8">
+          <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+            <div>
+              <p className="text-sm font-bold uppercase text-sky-300">
+                Mulai dari hal kecil
+              </p>
+              <h2 className="mt-2 max-w-2xl text-3xl font-bold">
+                Buka dashboard, tambah tugas pertama, lalu rapikan jadwal hari
+                ini.
+              </h2>
+            </div>
+            <Button asChild size="lg" variant="secondary">
+              <Link href="/auth/register">
+                Buat Akun
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      </main>
+    </>
+  );
 }
