@@ -1,9 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import { createElement } from "react";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Analytics } from "@vercel/analytics/next";
 import ClientLayout from "@/components/clientLayout";
 import RegisterSW from "@/register";
 
@@ -33,43 +33,31 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return createElement(
-    "html",
-    { lang: "en", suppressHydrationWarning: true },
-    createElement(
-      "head",
-      null,
-      createElement("link", { rel: "manifest", href: "/app.webmanifest" }),
-      createElement("link", {
-        href: "/colleger.png",
-        rel: "icon",
-        type: "image/png",
-      }),
-    ),
-    createElement(
-      "body",
-      {
-        className: `${geistSans.variable} ${geistMono.variable} antialiased bg-indigo-50 dark:bg-slate-800`,
-      },
-      createElement(
-        ThemeProvider,
-        {
-          attribute: "class",
-          defaultTheme: "system",
-          enableSystem: true,
-          disableTransitionOnChange: true,
-        },
-        createElement(
-          SidebarProvider,
-          null,
-          createElement(
-            ClientLayout,
-            null,
-            createElement(RegisterSW),
-            children,
-          ),
-        ),
-      ),
-    ),
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/app.webmanifest" />
+        <link rel="icon" href="/colleger.png" type="image/png" />
+      </head>
+
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-indigo-50 dark:bg-slate-800`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SidebarProvider>
+            <ClientLayout>
+              <RegisterSW />
+              {children}
+            </ClientLayout>
+          </SidebarProvider>
+        </ThemeProvider>
+        <Analytics />
+      </body>
+    </html>
   );
 }

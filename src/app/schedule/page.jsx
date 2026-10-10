@@ -1,11 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
 import { motion } from "framer-motion";
-import { auth } from "@/firebase/firebase";
-import ModelFirestore from "@/model/model";
 import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
 import { ScheduleCalendarCard } from "@/components/schedule/ScheduleCalendarCard";
 import { ScheduleAgendaCard } from "@/components/schedule/ScheduleAgendaCard";
