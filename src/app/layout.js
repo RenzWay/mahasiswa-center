@@ -18,8 +18,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Mahasiswa Center",
-  description: "The Web App with new some surprise",
+  metadataBase: new URL("https://mahasiswa-center.vercel.app"),
+  title: "Mahasiswa Center | Kelola Tugas, Jadwal, dan Catatan Kuliah",
+  description:
+    "Atur tugas kuliah, jadwal, dan catatan belajar dalam satu workspace sederhana untuk mahasiswa.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Mahasiswa Center | Workspace Akademik Mahasiswa",
+    description:
+      "Kelola tugas kuliah, jadwal, dan catatan belajar dalam satu tempat.",
+    url: "https://mahasiswa-center.vercel.app/",
+    siteName: "Mahasiswa Center",
+    type: "website",
+    locale: "id_ID",
+  },
   icons: {
     icon: [
       { rel: "icon", url: "/colleger.png", type: "image/png" },
