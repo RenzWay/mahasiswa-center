@@ -5,6 +5,8 @@ const eslintConfig = [
     {
         rules: {
             "react-hooks/set-state-in-effect": "off",
+            "no-undef": "error",
+            "no-unused-vars": "warn",
         },
     },
     {

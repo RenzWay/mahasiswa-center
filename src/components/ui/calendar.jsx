@@ -12,13 +12,13 @@ import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 
 function Calendar({
-  className,
-  classNames,
+  className = "",
+  classNames = {},
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
-  formatters,
-  components,
+  formatters = {},
+  components = {},
   ...props
 }) {
   const defaultClassNames = getDefaultClassNames()

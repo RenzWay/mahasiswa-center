@@ -1,0 +1,9 @@
+{
+  "javascript.suggest.autoImports": true,
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "editor.codeActionsOnSave": {
+    "source.addMissingImports": "explicit"
+  }
+}
