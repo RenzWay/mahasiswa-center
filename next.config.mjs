@@ -12,6 +12,16 @@ const nextConfig = {
       ),
     },
   },
+  webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "prosemirror-model": path.resolve(
+        process.cwd(),
+        "node_modules/prosemirror-model/dist/index.js",
+      ),
+    };
+    return config;
+  },
 };
 
 export default nextConfig;
