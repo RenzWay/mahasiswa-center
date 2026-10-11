@@ -38,7 +38,7 @@ export function DropdownFooterSidebar({ theme, setTheme, toggleTheme, user }) {
             <div className="flex min-w-0 items-center gap-3">
               <Avatar className="size-9 shrink-0 border border-slate-200 dark:border-slate-700">
                 <AvatarImage
-                  src={user?.photoURL || "/default-avatar.png"}
+                  src={user?.photoURL || undefined}
                   alt={user?.displayName || "User Avatar"}
                 />
                 <AvatarFallback className="bg-slate-950 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
